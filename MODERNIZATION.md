@@ -84,7 +84,30 @@ chmod +x scripts/install.sh
 1. **D3.js v7**: API changes from v4, may require code updates
 2. **Winston v3**: Logging API changes
 3. **Redis v4**: Client API changes
-4. **Canvas**: Switched from custom git repo to official package
+4. **Canvas**: Updated to v3.2.0 with Node.js 18 compatibility fixes
+
+## Canvas Compilation Fixes
+
+The canvas package has been updated to work with Node.js 18.19.0:
+
+- **Updated to canvas v3.2.0** with Node.js 18 compatibility
+- **Added Python3 support** for native module compilation
+- **Configured prebuilt binaries** to avoid compilation issues
+- **Updated Docker setup** with proper build tools
+- **Created troubleshooting guide** for canvas-related issues
+
+### Canvas Installation
+```bash
+# Use the provided scripts
+chmod +x scripts/install-canvas.sh
+./scripts/install-canvas.sh
+
+# Or install manually with proper environment variables
+export PYTHON=/usr/bin/python3
+export npm_config_python=/usr/bin/python3
+export npm_config_canvas_binary_host_mirror=https://registry.npmjs.org/@mapbox/node-pre-gyp-github-releases/download/
+npm install
+```
 
 ## Testing
 

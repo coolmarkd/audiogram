@@ -6,18 +6,29 @@
 
 ## Installation with Audit Suppression
 
-### Option 1: Using the install script
+### Option 1: Using the install script (Recommended)
 ```bash
 chmod +x scripts/install.sh
 ./scripts/install.sh
 ```
 
-### Option 2: Manual installation
+### Option 2: Canvas-specific installation
+```bash
+chmod +x scripts/install-canvas.sh
+./scripts/install-canvas.sh
+```
+
+### Option 3: Manual installation
 ```bash
 # Suppress npm audit warnings
 npm config set audit-level moderate
 npm config set fund false
 npm config set update-notifier false
+
+# Set environment variables for canvas compilation
+export PYTHON=/usr/bin/python3
+export npm_config_python=/usr/bin/python3
+export npm_config_canvas_binary_host_mirror=https://registry.npmjs.org/@mapbox/node-pre-gyp-github-releases/download/
 
 # Install dependencies
 npm install

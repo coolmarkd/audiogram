@@ -18,7 +18,8 @@
     "audit:suppress": "npm audit --audit-level=moderate",
     "audit:fix": "npm audit fix --force",
     "install:safe": "npm install --audit-level=moderate --fund=false",
-    "update:deps": "node scripts/update-deps.js"
+    "update:deps": "node scripts/update-deps.js",
+    "test:canvas": "node scripts/test-canvas.js"
   },
   "repository": {
     "type": "git",
@@ -33,7 +34,6 @@
   "dependencies": {
     "aws-sdk": "^2.1691.0",
     "browserify": "^17.0.0",
-    "canvas": "^2.11.2",
     "compression": "^1.7.4",
     "d3": "^7.8.5",
     "dotenv": "^16.3.1",

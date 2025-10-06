@@ -1,4 +1,4 @@
-FROM node:18.19.0-slim
+FROM node:16.20.2-slim
 
 # Install system dependencies for canvas compilation
 RUN apt-get update --yes && apt-get upgrade --yes
@@ -38,8 +38,8 @@ ENV PYTHON=/usr/bin/python3
 ENV npm_config_python=/usr/bin/python3
 ENV npm_config_canvas_binary_host_mirror=https://registry.npmjs.org/@mapbox/node-pre-gyp-github-releases/download/
 
-# Install canvas separately first (with specific version)
-RUN npm install canvas@3.2.0 --audit-level=moderate --fund=false
+# Install canvas separately first (with specific version for Node.js 16)
+RUN npm install canvas@2.11.2 --audit-level=moderate --fund=false
 
 # Install remaining dependencies with audit suppression
 RUN npm install --audit-level=moderate --fund=false
