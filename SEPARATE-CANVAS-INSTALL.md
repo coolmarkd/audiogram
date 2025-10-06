@@ -68,6 +68,8 @@ docker build -t audiogram .
 docker build -f Dockerfile.node16 -t audiogram .
 ```
 
+**Note**: Both Dockerfiles use local files instead of cloning from GitHub, so your current changes will be included in the build.
+
 ## Canvas Versions
 
 | Node.js Version | Canvas Version | Status |

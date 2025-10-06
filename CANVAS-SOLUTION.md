@@ -29,6 +29,8 @@ docker build -t audiogram .
 docker build -f Dockerfile.node16 -t audiogram .
 ```
 
+**Note**: Both Dockerfiles now use local files instead of cloning from GitHub, so your current changes will be included in the build.
+
 ## Key Changes Made
 
 ### 1. Updated package.json

@@ -19,7 +19,8 @@
     "audit:fix": "npm audit fix --force",
     "install:safe": "npm install --audit-level=moderate --fund=false",
     "update:deps": "node scripts/update-deps.js",
-    "test:canvas": "node scripts/test-canvas.js"
+    "test:canvas": "node scripts/test-canvas.js",
+    "docker:build": "chmod +x scripts/build-docker.sh && ./scripts/build-docker.sh"
   },
   "repository": {
     "type": "git",

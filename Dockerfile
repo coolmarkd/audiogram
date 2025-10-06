@@ -24,14 +24,20 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python
 # Non-privileged user
 RUN useradd -m audiogram
 USER audiogram
-WORKDIR /home/audiogram
-
-# Clone repo
-RUN git clone https://github.com/nypublicradio/audiogram.git
 WORKDIR /home/audiogram/audiogram
 
-# Copy npm config to suppress audit warnings
+# Copy local files (excluding node_modules and other build artifacts)
+COPY --chown=audiogram:audiogram package.json package-lock.json ./
 COPY --chown=audiogram:audiogram .npmrc ./
+COPY --chown=audiogram:audiogram audiogram/ ./audiogram/
+COPY --chown=audiogram:audiogram bin/ ./bin/
+COPY --chown=audiogram:audiogram client/ ./client/
+COPY --chown=audiogram:audiogram editor/ ./editor/
+COPY --chown=audiogram:audiogram renderer/ ./renderer/
+COPY --chown=audiogram:audiogram server/ ./server/
+COPY --chown=audiogram:audiogram scripts/ ./scripts/
+COPY --chown=audiogram:audiogram test/ ./test/
+COPY --chown=audiogram:audiogram themes/ ./themes/
 
 # Set environment variables for canvas compilation
 ENV PYTHON=/usr/bin/python3
