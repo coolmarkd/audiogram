@@ -3,6 +3,10 @@
   "version": "0.9.5",
   "description": "Turn audio into a shareable video.",
   "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "start": "npm run postinstall && bin/server",
     "worker": "bin/worker",
@@ -10,7 +14,11 @@
     "rebuild": "npm run postinstall",
     "watch": "mkdir -p editor/js && watchify client/index.js -o editor/js/bundle.js",
     "debug": "npm run postinstall && DEBUG=1 bin/server",
-    "test": "rm -rf test/tmp && tape 'test/**/*-test.js'"
+    "test": "rm -rf test/tmp && tape 'test/**/*-test.js'",
+    "audit:suppress": "npm audit --audit-level=moderate",
+    "audit:fix": "npm audit fix --force",
+    "install:safe": "npm install --audit-level=moderate --fund=false",
+    "update:deps": "node scripts/update-deps.js"
   },
   "repository": {
     "type": "git",
@@ -23,29 +31,38 @@
   },
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.2.39",
-    "browserify": "^13.0.0",
-    "canvas": "git+https://github.com/chearon/node-canvas.git#12971f64a66b",
-    "compression": "^1.6.1",
-    "d3": "4.10.0",
-    "dotenv": "^2.0.0",
-    "express": "^4.13.3",
-    "jquery": "^2.2.1",
-    "mkdirp": "^0.5.1",
-    "morgan": "^1.7.0",
-    "multer": "^1.1.0",
+    "aws-sdk": "^2.1691.0",
+    "browserify": "^17.0.0",
+    "canvas": "^2.11.2",
+    "compression": "^1.7.4",
+    "d3": "^7.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jquery": "^3.7.1",
+    "mkdirp": "^3.0.1",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
     "node-ffprobe": "^1.2.2",
-    "redis": "^2.4.2",
-    "rimraf": "^2.5.0",
-    "smartquotes": "^1.0.0",
-    "underscore": "^1.8.3",
-    "uuid": "^3.0.1",
-    "webaudio-peaks": "0.0.5",
-    "winston": "^2.2.0"
+    "redis": "^4.6.10",
+    "rimraf": "^5.0.5",
+    "smartquotes": "^2.0.1",
+    "underscore": "^1.13.6",
+    "uuid": "^9.0.1",
+    "webaudio-peaks": "^0.0.5",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
-    "supertest": "^1.2.0",
-    "tape": "^4.6.0",
-    "watchify": "^3.7.0"
+    "supertest": "^6.3.3",
+    "tape": "^5.6.6",
+    "watchify": "^4.0.0"
+  },
+  "overrides": {
+    "minimist": "^1.2.8",
+    "semver": "^7.5.4"
+  },
+  "npmConfig": {
+    "audit-level": "moderate",
+    "fund": false,
+    "update-notifier": false
   }
 }
