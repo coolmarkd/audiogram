@@ -45,7 +45,7 @@ RUN npm install canvas@3.2.0 --audit-level=moderate --fund=false
 RUN npm install --audit-level=moderate --fund=false
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 8888
 
 # Start the application
 CMD ["npm", "start"]
