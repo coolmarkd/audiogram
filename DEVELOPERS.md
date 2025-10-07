@@ -1,5 +1,8 @@
 Audiogram was developed for our particular needs but hopefully it should be reasonably hackable besides the options provided.  Here are some examples of possible customization that involve writing/editing the code and notes on how you could get started.
 
+## Hack to build the code in the docker container build but without needing --no-cache
+Run the build command with `--build-arg CACHEBUST=$(date +%s)`, so something like `docker build -t audiogram . --build-arg CACHEBUST=$(date +%s)`
+
 ## Use different animations besides the wave/bars/bricks
 
 The code that handles drawing a waveform involves three pieces:

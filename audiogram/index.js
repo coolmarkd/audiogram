@@ -1,7 +1,7 @@
 var path = require("path"),
     queue = require("d3").queue,
     { mkdirp } = require("mkdirp"),
-    rimraf = require("rimraf"),
+    { rimraf } = require("rimraf"),
     serverSettings = require("../lib/settings/"),
     transports = require("../lib/transports/"),
     logger = require("../lib/logger/"),
@@ -175,7 +175,11 @@ Audiogram.prototype.render = function(cb) {
   q.defer(transports.uploadVideo, this.videoPath, "video/" + this.id + ".mp4");
 
   // Delete working directory
-  q.defer(rimraf, this.dir);
+  q.defer(function(dir, callback) {
+    rimraf(dir).then(function() {
+      callback(null);
+    }).catch(callback);
+  }, this.dir);
 
   // Final callback, results in a URL where the finished video is accessible
   q.await(function(err){

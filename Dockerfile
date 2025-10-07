@@ -27,6 +27,7 @@ USER audiogram
 WORKDIR /home/audiogram/audiogram
 
 # Clone the repository from GitHub
+ARG CACHEBUST=1 # Force rebuild
 RUN echo "Always Git!" &&  date && git clone https://github.com/coolmarkd/audiogram /tmp/audiogram
 RUN cp -r /tmp/audiogram/* ./
 RUN rm -rf /tmp/audiogram
