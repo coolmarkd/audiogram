@@ -4,20 +4,25 @@ var d3 = require("d3"),
     video = require("./video.js"),
     audio = require("./audio.js");
 
-d3.json("/settings/themes.json", function(err, themes){
+// Global configuration object
+var config = {
+  baseUrl: window.location.origin
+};
 
-  var errorMessage;
+// Load configuration from server
+d3.json("/config.json", function(err, serverConfig) {
+  if (!err && serverConfig) {
+    config.baseUrl = serverConfig.protocol + "://" + serverConfig.host;
+  }
+  
+  // Now load themes with the correct base URL
+  loadThemes();
+});
 
-  // Debug logging
-  console.log("Current URL:", window.location.href);
-  console.log("Base URL:", window.location.origin);
-  console.log("Themes loading - err:", err);
-  console.log("Themes loading - themes:", themes);
-  console.log("Themes loading - themes type:", typeof themes);
-  console.log("Themes loading - themes keys:", themes ? Object.keys(themes) : "null");
-  console.log("Themes loading - d3.keys result:", themes ? d3.keys(themes) : "null");
-  console.log("Themes loading - filtered keys:", themes ? d3.keys(themes).filter(function(d){ return d !== "default"; }) : "null");
-  console.log("Themes loading - filtered length:", themes ? d3.keys(themes).filter(function(d){ return d !== "default"; }).length : "null");
+function loadThemes() {
+  d3.json(config.baseUrl + "/settings/themes.json", function(err, themes){
+
+    var errorMessage;
 
   // Themes are missing or invalid
   if (err || !d3.keys(themes).filter(function(d){ return d !== "default"; }).length) {
@@ -85,7 +90,7 @@ function submitted() {
   d3.select("#loading-message").text("Uploading audio...");
 
 	$.ajax({
-		url: "/submit/",
+		url: config.baseUrl + "/submit/",
 		type: "POST",
 		data: formData,
 		contentType: false,
@@ -105,7 +110,7 @@ function poll(id) {
 
   setTimeout(function(){
     $.ajax({
-      url: "/status/" + id + "/",
+      url: config.baseUrl + "/status/" + id + "/",
       error: error,
       dataType: "json",
       success: function(result){
@@ -271,7 +276,7 @@ function preloadImages(themes) {
       return cb(null, theme);
     };
 
-    theme.backgroundImageFile.src = "/settings/backgrounds/" + theme.backgroundImage;
+    theme.backgroundImageFile.src = config.baseUrl + "/settings/backgrounds/" + theme.backgroundImage;
 
   }
 

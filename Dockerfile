@@ -43,6 +43,9 @@ RUN npm install canvas@3.2.0 --audit-level=moderate --fund=false
 # Install remaining dependencies with audit suppression
 RUN npm install --audit-level=moderate --fund=false
 
+# Set the PORT environment variable
+ENV PORT=8888
+
 # Expose the port the app runs on
 EXPOSE 8888
 

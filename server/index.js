@@ -63,6 +63,14 @@ if (serverSettings.fonts) {
 // Check the status of a current video
 app.get("/status/:id/", status);
 
+// Serve configuration for client-side JavaScript
+app.get("/config.json", function(req, res) {
+  res.json({
+    port: process.env.PORT || 8888,
+    host: req.get('host') || 'localhost:8888',
+    protocol: req.protocol || 'http'
+  });
+});
 
 // Serve background images and themes JSON statically
 app.use("/settings/", function(req, res, next) {
