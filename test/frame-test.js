@@ -1,5 +1,5 @@
 var tape = require("tape"),
-    Canvas = require("canvas"),
+    { createCanvas, Image } = require("canvas"),
     d3 = require("d3"),
     path = require("path"),
     fs = require("fs"),
@@ -71,7 +71,7 @@ tape.test("Square frame", tester({
 
 function checkFrame(test, options) {
 
-  var testCanvas = new Canvas(options.width, options.height),
+  var testCanvas = createCanvas(options.width, options.height),
       context = testCanvas.getContext("2d");
 
   d3.queue()
@@ -81,7 +81,7 @@ function checkFrame(test, options) {
 
       test.error(e);
 
-      var img = new Canvas.Image;
+      var img = new Image;
       img.src = f1;
 
       var bg = getColor(options.backgroundColor || "#fff"),

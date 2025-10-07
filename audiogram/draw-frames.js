@@ -1,6 +1,6 @@
 var fs = require("fs"),
     path = require("path"),
-    Canvas = require("canvas"),
+    { createCanvas } = require("canvas"),
     queue = require("d3").queue;
 
 function drawFrames(renderer, options, cb) {
@@ -9,7 +9,7 @@ function drawFrames(renderer, options, cb) {
       canvases = [];
 
   for (var i = 0; i < 10; i++) {
-    canvases.push(new Canvas(options.width, options.height));
+    canvases.push(createCanvas(options.width, options.height));
   }
 
   for (var i = 0; i < options.numFrames; i++) {

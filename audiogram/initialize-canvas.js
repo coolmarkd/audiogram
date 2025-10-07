@@ -1,6 +1,6 @@
 var fs = require("fs"),
     path = require("path"),
-    Canvas = require("canvas"),
+    { Image } = require("canvas"),
     getRenderer = require("../renderer/");
 
 function initializeCanvas(theme, cb) {
@@ -19,7 +19,7 @@ function initializeCanvas(theme, cb) {
       return cb(err);
     }
 
-    var bg = new Canvas.Image;
+    var bg = new Image;
     bg.src = raw;
     renderer.backgroundImage(bg);
 
