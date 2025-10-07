@@ -9,6 +9,8 @@ d3.json("/settings/themes.json", function(err, themes){
   var errorMessage;
 
   // Debug logging
+  console.log("Current URL:", window.location.href);
+  console.log("Base URL:", window.location.origin);
   console.log("Themes loading - err:", err);
   console.log("Themes loading - themes:", themes);
   console.log("Themes loading - themes type:", typeof themes);
