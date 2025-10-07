@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Themes</title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+</head>
+<body>
+    <div id="output"></div>
+    <script>
+        d3.json("/settings/themes.json", function(err, themes){
+            var output = d3.select("#output");
+            
+            if (err) {
+                output.html("Error: " + err.toString());
+                return;
+            }
+            
+            output.html("Themes loaded successfully!<br/>");
+            output.append("div").text("Number of themes: " + Object.keys(themes).length);
+            output.append("div").text("Theme keys: " + Object.keys(themes).join(", "));
+            
+            var nonDefaultThemes = Object.keys(themes).filter(function(d){ return d !== "default"; });
+            output.append("div").text("Non-default themes: " + nonDefaultThemes.length);
+            output.append("div").text("Non-default theme names: " + nonDefaultThemes.join(", "));
+            
+            if (nonDefaultThemes.length === 0) {
+                output.append("div").style("color", "red").text("ERROR: No themes found in settings/themes.json");
+            } else {
+                output.append("div").style("color", "green").text("SUCCESS: Themes loaded correctly");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -8,6 +8,15 @@ d3.json("/settings/themes.json", function(err, themes){
 
   var errorMessage;
 
+  // Debug logging
+  console.log("Themes loading - err:", err);
+  console.log("Themes loading - themes:", themes);
+  console.log("Themes loading - themes type:", typeof themes);
+  console.log("Themes loading - themes keys:", themes ? Object.keys(themes) : "null");
+  console.log("Themes loading - d3.keys result:", themes ? d3.keys(themes) : "null");
+  console.log("Themes loading - filtered keys:", themes ? d3.keys(themes).filter(function(d){ return d !== "default"; }) : "null");
+  console.log("Themes loading - filtered length:", themes ? d3.keys(themes).filter(function(d){ return d !== "default"; }).length : "null");
+
   // Themes are missing or invalid
   if (err || !d3.keys(themes).filter(function(d){ return d !== "default"; }).length) {
     if (err instanceof SyntaxError) {
