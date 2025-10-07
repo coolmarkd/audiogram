@@ -3,6 +3,11 @@ var queue = require("d3").queue,
 
 module.exports = function(req, res) {
 
+  // Add CORS headers
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+
   queue(1)
     .defer(transports.getJobList)
     .defer(transports.getHash, req.params.id)

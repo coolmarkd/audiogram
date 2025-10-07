@@ -148,7 +148,11 @@ Audiogram.prototype.render = function(cb) {
   this.status("audio-download");
 
   // Set up tmp directory
-  q.defer(mkdirp, this.frameDir);
+  q.defer(function(dir, callback) {
+    mkdirp(dir).then(function() {
+      callback(null);
+    }).catch(callback);
+  }, this.frameDir);
 
   // Download the stored audio file
   q.defer(transports.downloadAudio, "audio/" + this.id, this.audioPath);

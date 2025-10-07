@@ -41,18 +41,21 @@ function route(req, res) {
   transports.uploadAudio(path.join(req.file.destination, "audio"), "audio/" + id,function(err) {
 
     if (err) {
+      console.error("Error uploading audio:", err);
       throw err;
     }
 
     // Queue up the job with a timestamp
-    transports.addJob(_.extend({ id: id, created: (new Date()).getTime() }, req.body));
+    var jobData = _.extend({ id: id, created: (new Date()).getTime() }, req.body);
+    console.log("Adding job to queue:", id);
+    transports.addJob(jobData);
 
     res.json({ id: id });
 
     // If there's no separate worker, spawn one right away
     if (!serverSettings.worker) {
 
-      logger.debug("Spawning worker");
+      console.log("Spawning worker for job:", id);
 
       // Empty args to avoid child_process Linux error
       spawn("bin/worker", [], {

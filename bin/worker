@@ -17,15 +17,16 @@ function pluckJob(){
   transports.getJob(function(err, job){
 
     if (err) {
+      console.error("Error getting job:", err);
       throw err;
     }
 
     if (job) {
-
+      console.log("Processing job:", job.id);
       return render(job);
-
     }
 
+    console.log("No jobs available, waiting...");
     setTimeout(pluckJob, delay());
 
   });
@@ -38,14 +39,18 @@ function render(job) {
 
   audiogram.settings = job;
 
+  console.log("Starting render for job:", job.id);
+
   audiogram.render(function(err){
 
     if (err) {
+      console.error("Render error for job", job.id, ":", err);
       audiogram.status("error");
       audiogram.set("error", err.toString());
       throw err;
     }
 
+    console.log("Render completed for job:", job.id);
     audiogram.status("ready");
 
     if (process.env.SPAWNED) {

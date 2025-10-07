@@ -68,6 +68,9 @@ app.get("/status/:id/", status);
 
 // Serve configuration for client-side JavaScript
 app.get("/config.json", function(req, res) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
   res.json({
     port: process.env.PORT || 8888,
     host: req.get('host') || 'localhost:8888',
