@@ -26,11 +26,8 @@ RUN useradd -m audiogram
 USER audiogram
 WORKDIR /home/audiogram/audiogram
 
-# Clone the repository from GitHub
-#RUN git clone https://github.com/nypublicradio/audiogram.git /tmp/audiogram
-RUN git clone https://github.com/coolmarkd/audiogram /tmp/audiogram
-RUN cp -r /tmp/audiogram/* ./
-RUN rm -rf /tmp/audiogram
+# Copy files from local filesystem
+COPY --chown=audiogram:audiogram . .
 
 
 # Set environment variables for canvas compilation
