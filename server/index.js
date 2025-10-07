@@ -28,7 +28,9 @@ var fileOptions = {
 
       var dir = path.join(serverSettings.workingDirectory, uuid.v1());
 
-      mkdirp(dir, function(err) {
+      mkdirp(dir).then(function() {
+        return cb(null, dir);
+      }).catch(function(err) {
         return cb(err, dir);
       });
     },
