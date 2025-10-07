@@ -10,9 +10,9 @@
   "scripts": {
     "start": "npm run postinstall && bin/server",
     "worker": "bin/worker",
-    "postinstall": "mkdir -p editor/js && browserify client/index.js > editor/js/bundle.js",
+    "postinstall": "mkdir -p editor/js && browserify client/index.js -t [ babelify --presets [ @babel/preset-env ] ] > editor/js/bundle.js",
     "rebuild": "npm run postinstall",
-    "watch": "mkdir -p editor/js && watchify client/index.js -o editor/js/bundle.js",
+    "watch": "mkdir -p editor/js && watchify client/index.js -t [ babelify --presets [ @babel/preset-env ] ] -o editor/js/bundle.js",
     "debug": "npm run postinstall && DEBUG=1 bin/server",
     "test": "rm -rf test/tmp && tape 'test/**/*-test.js'",
     "audit:suppress": "npm audit --audit-level=moderate",
@@ -53,6 +53,9 @@
     "winston": "^3.11.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "babelify": "^10.0.0",
     "supertest": "^6.3.3",
     "tape": "^5.6.6",
     "watchify": "^4.0.0"

@@ -5,9 +5,9 @@ yarn-debug.log*
 yarn-error.log*
 
 # Build artifacts
-editor/js/
-dist/
-build/
+#editor/js/
+#dist/
+#build/
 
 # Environment files
 .env
@@ -32,15 +32,15 @@ Thumbs.db
 .gitignore
 
 # Documentation (optional - remove if you want docs in container)
-*.md
-!README.md
+#*.md
+#!README.md
 
 # Test files (optional - remove if you want tests in container)
-test/
+#test/
 
 # Logs
-logs/
-*.log
+#logs/
+#*.log
 
 # Runtime data
 pids/
