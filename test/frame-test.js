@@ -6,7 +6,7 @@ var tape = require("tape"),
     initializeCanvas = require("../audiogram/initialize-canvas.js"),
     drawFrames = require("../audiogram/draw-frames.js");
 
-require("mkdirp").sync(path.join(__dirname, "tmp", "frames"));
+require("mkdirp").mkdirpSync(path.join(__dirname, "tmp", "frames"));
 
 var frameDir = path.join(__dirname, "tmp", "frames");
 

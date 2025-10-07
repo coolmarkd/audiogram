@@ -3,7 +3,7 @@ var tape = require("tape"),
     fs = require("fs"),
     queue = require("d3").queue;
 
-require("mkdirp").sync(path.join(__dirname, "tmp"));
+require("mkdirp").mkdirpSync(path.join(__dirname, "tmp"));
 
 var probe = require("../lib/probe.js"),
     trimAudio = require("../audiogram/trim.js");

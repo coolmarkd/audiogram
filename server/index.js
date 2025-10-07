@@ -4,7 +4,7 @@ var express = require("express"),
     path = require("path"),
     multer = require("multer"),
     uuid = require("uuid"),
-    mkdirp = require("mkdirp");
+    { mkdirp } = require("mkdirp");
 
 // Routes and middleware
 var logger = require("../lib/logger/"),

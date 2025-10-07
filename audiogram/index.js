@@ -1,6 +1,6 @@
 var path = require("path"),
     queue = require("d3").queue,
-    mkdirp = require("mkdirp"),
+    { mkdirp } = require("mkdirp"),
     rimraf = require("rimraf"),
     serverSettings = require("../lib/settings/"),
     transports = require("../lib/transports/"),
