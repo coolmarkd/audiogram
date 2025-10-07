@@ -24,15 +24,16 @@ app.use(logger.morgan());
 // Options for where to store uploaded audio and max size
 var fileOptions = {
   storage: multer.diskStorage({
-    destination: function(req, file, cb) {
+    destination: async function(req, file, cb) {
 
       var dir = path.join(serverSettings.workingDirectory, uuid.v1());
 
-      mkdirp(dir).then(function() {
+      try {
+        await mkdirp(dir);
         return cb(null, dir);
-      }).catch(function(err) {
+      } catch (err) {
         return cb(err, dir);
-      });
+      }
     },
     filename: function(req, file, cb) {
       cb(null, "audio");
