@@ -167,6 +167,19 @@ module.exports = function() {
       if (onUpdate) onUpdate("transcribe");
     });
 
+    // Set up WebVTT export/import buttons
+    d3.select("#export-webvtt-btn").on("click", function() {
+      d3.event.preventDefault();
+      exportToWebVTT();
+    });
+
+    d3.select("#import-webvtt-btn").on("click", function() {
+      d3.event.preventDefault();
+      d3.select("#webvtt-file-input").node().click();
+    });
+
+    d3.select("#webvtt-file-input").on("change", handleWebVTTUpload);
+
     updateUI();
     updateSpeakerRecognitionUI();
     updateSpeakerCountUI();
@@ -1078,6 +1091,176 @@ module.exports = function() {
     }
   }
 
+  // WebVTT Helper Functions
+  function formatWebVTTTimestamp(seconds) {
+    var hours = Math.floor(seconds / 3600);
+    var minutes = Math.floor((seconds % 3600) / 60);
+    var secs = Math.floor(seconds % 60);
+    var ms = Math.floor((seconds % 1) * 1000);
+    
+    return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(secs, 2) + '.' + pad(ms, 3);
+  }
+
+  function parseWebVTTTimestamp(timestamp) {
+    // Parse HH:MM:SS.mmm or MM:SS.mmm format
+    var parts = timestamp.split(':');
+    var seconds = 0;
+    
+    if (parts.length === 3) {
+      // HH:MM:SS.mmm
+      seconds += parseInt(parts[0]) * 3600;
+      seconds += parseInt(parts[1]) * 60;
+      seconds += parseFloat(parts[2]);
+    } else if (parts.length === 2) {
+      // MM:SS.mmm
+      seconds += parseInt(parts[0]) * 60;
+      seconds += parseFloat(parts[1]);
+    }
+    
+    return seconds;
+  }
+
+  function extractSpeakerFromVTT(text) {
+    // Extract speaker from <v Speaker>text format
+    var match = text.match(/^<v\s+([^>]+)>(.*)$/);
+    if (match) {
+      return {
+        speaker: match[1].trim(),
+        text: match[2].trim()
+      };
+    }
+    return {
+      speaker: null,
+      text: text
+    };
+  }
+
+  function pad(num, size) {
+    var s = "000" + num;
+    return s.substr(s.length - size);
+  }
+
+  // WebVTT Export Function
+  function exportToWebVTT() {
+    var currentSegments = getSegments();
+    
+    if (!currentSegments || currentSegments.length === 0) {
+      alert("No captions to export. Please generate captions first.");
+      return;
+    }
+
+    // Build WebVTT content
+    var vttContent = "WEBVTT\n\n";
+    
+    currentSegments.forEach(function(segment, index) {
+      // Add cue identifier (optional but helpful)
+      vttContent += (index + 1) + "\n";
+      
+      // Add timestamp line
+      vttContent += formatWebVTTTimestamp(segment.start) + " --> " + formatWebVTTTimestamp(segment.end) + "\n";
+      
+      // Add text with optional speaker tag
+      if (segment.speaker && speakerRecognitionEnabled) {
+        vttContent += "<v " + segment.speaker + ">" + segment.text + "\n";
+      } else {
+        vttContent += segment.text + "\n";
+      }
+      
+      // Add blank line between cues
+      vttContent += "\n";
+    });
+
+    // Create blob and download
+    var blob = new Blob([vttContent], { type: 'text/vtt' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'captions.vtt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    console.log("Exported " + currentSegments.length + " captions to WebVTT");
+  }
+
+  // WebVTT Import Function
+  function importFromWebVTT(vttContent) {
+    try {
+      // Validate WebVTT header
+      if (!vttContent.trim().startsWith('WEBVTT')) {
+        throw new Error("Invalid WebVTT file: Missing WEBVTT header");
+      }
+
+      var lines = vttContent.split('\n');
+      var newSegments = [];
+      var currentCue = null;
+      var i = 0;
+
+      // Skip header and any metadata
+      while (i < lines.length && !lines[i].includes('-->')) {
+        i++;
+      }
+
+      while (i < lines.length) {
+        var line = lines[i].trim();
+
+        // Check if this is a timestamp line
+        if (line.includes('-->')) {
+          var timestamps = line.split('-->');
+          if (timestamps.length === 2) {
+            currentCue = {
+              start: parseWebVTTTimestamp(timestamps[0].trim()),
+              end: parseWebVTTTimestamp(timestamps[1].trim()),
+              text: '',
+              speaker: null
+            };
+          }
+        } else if (line.length > 0 && currentCue && !line.match(/^\d+$/)) {
+          // This is text content (not a cue number)
+          var extracted = extractSpeakerFromVTT(line);
+          currentCue.speaker = extracted.speaker;
+          currentCue.text = extracted.text;
+          
+          // Save the cue
+          newSegments.push(currentCue);
+          currentCue = null;
+        }
+
+        i++;
+      }
+
+      if (newSegments.length === 0) {
+        throw new Error("No valid captions found in WebVTT file");
+      }
+
+      // Set the imported segments
+      setSegments(newSegments);
+      
+      console.log("Imported " + newSegments.length + " captions from WebVTT");
+      alert("Successfully imported " + newSegments.length + " captions!");
+
+    } catch (error) {
+      console.error("Error importing WebVTT:", error);
+      alert("Error importing WebVTT file: " + error.message);
+    }
+  }
+
+  // Handle WebVTT file upload
+  function handleWebVTTUpload(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      importFromWebVTT(e.target.result);
+    };
+    reader.onerror = function() {
+      alert("Error reading file. Please try again.");
+    };
+    reader.readAsText(file);
+  }
+
   return {
     init: init,
     setMode: setMode,
@@ -1100,7 +1283,10 @@ module.exports = function() {
     initPreview: initPreview,
     startPreview: startPreview,
     pausePreview: pausePreview,
-    stopPreview: stopPreview
+    stopPreview: stopPreview,
+    exportToWebVTT: exportToWebVTT,
+    importFromWebVTT: importFromWebVTT,
+    handleWebVTTUpload: handleWebVTTUpload
   };
 
 };
