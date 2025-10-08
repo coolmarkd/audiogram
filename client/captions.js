@@ -178,7 +178,9 @@ module.exports = function() {
   function updateSpeakerCountUI() {
     var speakerCountInput = d3.select("#speaker-count-input");
     var speakerCountNote = d3.select("#speaker-count-note");
-    
+    console.log("speakerCountType: " + speakerCountType);
+    console.log("speakerCountValue: " + speakerCountValue);
+    console.log("speakerCountNote: " + speakerCountNote);
     if (speakerCountType === "auto") {
       speakerCountInput.classed("hidden", true);
     } else {
