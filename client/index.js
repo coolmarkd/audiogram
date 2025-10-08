@@ -12,7 +12,12 @@ var config = {
 // Load configuration from server
 d3.json("/config.json", function(err, serverConfig) {
   if (!err && serverConfig) {
+    console.log("Received server config:", serverConfig);
     config.baseUrl = serverConfig.protocol + "://" + serverConfig.host;
+    console.log("Set baseUrl to:", config.baseUrl);
+  } else {
+    console.error("Error loading config.json:", err);
+    console.log("Using fallback baseUrl:", config.baseUrl);
   }
   
   // Now load themes with the correct base URL

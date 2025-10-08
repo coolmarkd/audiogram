@@ -71,11 +71,28 @@ app.get("/config.json", function(req, res) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.json({
-    port: process.env.PORT || 8888,
-    host: req.get('host') || 'localhost:8888',
+  
+  var port = process.env.PORT || 8888;
+  var host = req.get('host');
+  
+  // If host doesn't include port, add it
+  if (host && !host.includes(':')) {
+    host = host + ':' + port;
+  }
+  
+  // Fallback if host is not available
+  if (!host) {
+    host = 'localhost:' + port;
+  }
+  
+  var config = {
+    port: port,
+    host: host,
     protocol: req.protocol || 'http'
-  });
+  };
+  
+  console.log("Config.json requested, returning:", config);
+  res.json(config);
 });
 
 // Serve background images and themes JSON statically
