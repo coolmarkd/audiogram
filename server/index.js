@@ -74,7 +74,7 @@ app.post("/transcribe/:id/", function(req, res) {
   
   console.log("Transcription requested for:", id);
   
-  transcribe.transcribe(audioPath, {}, function(err, segments) {
+  transcribe.transcribe(audioPath, req.body, function(err, segments) {
     if (err) {
       console.error("Transcription error:", err);
       return res.status(500).json({ error: err.message || "Transcription failed" });
