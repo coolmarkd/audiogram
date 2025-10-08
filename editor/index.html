@@ -209,6 +209,23 @@
           </div>
           <div id="captions-list"></div>
         </div>
+        <div id="caption-preview-section" class="hidden">
+          <h4>Caption Preview</h4>
+          <div id="caption-preview-container">
+            <div id="caption-preview-canvas">
+              <canvas width="640" height="360"></canvas>
+              <div id="caption-preview-overlay">
+                <div id="preview-caption" class="preview-caption"></div>
+              </div>
+            </div>
+            <div id="preview-controls">
+              <button id="preview-play" class="preview-btn">▶ Play Preview</button>
+              <button id="preview-pause" class="preview-btn hidden">⏸ Pause</button>
+              <button id="preview-stop" class="preview-btn">⏹ Stop</button>
+              <span id="preview-time">0.0s</span>
+            </div>
+          </div>
+        </div>
         <div id="preview">
           <div style="background-color: black;">
             <div id="canvas">
@@ -258,6 +275,7 @@
         <div class="row" id="row-submit">
           <button type="button" id="return" class="left"><i class="fa fa-edit"></i>Return to editor</button>
           <button type="button" id="submit" class="right hidden"><i class="fa fa-cloud-upload"></i>Generate</button>
+          <button type="button" id="regenerate" class="right hidden"><i class="fa fa-refresh"></i>Regenerate Video</button>
           <a id="download" class="button right" href="#" target="_blank"><i class="fa fa-download"></i>Download</a>
           <div class="clear"></div>
         </div>

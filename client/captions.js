@@ -6,6 +6,9 @@ module.exports = function() {
   var segments = [],
       captionMode = "static",
       onUpdate = null,
+      previewInterval = null,
+      previewTime = 0,
+      previewPlaying = false,
       speakerNames = {}, // Map of speaker labels to custom names
       speakerRecognitionEnabled = true, // Whether speaker recognition is enabled
       captionFormatting = {
@@ -77,6 +80,9 @@ module.exports = function() {
 
     updateUI();
     updateSpeakerRecognitionUI();
+    
+    // Initialize preview
+    initPreview();
   }
 
   function updateUI() {
@@ -141,6 +147,12 @@ module.exports = function() {
     });
     
     renderSegments();
+    
+    // Show preview section if we have segments
+    var previewSection = document.getElementById('caption-preview-section');
+    if (previewSection && segments.length > 0) {
+      previewSection.classList.remove('hidden');
+    }
   }
 
   function getSegments() {
@@ -602,6 +614,138 @@ module.exports = function() {
     renderSpeakerFormattingEditor();
   }
 
+  function initPreview() {
+    var previewSection = document.getElementById('caption-preview-section');
+    var playBtn = document.getElementById('preview-play');
+    var pauseBtn = document.getElementById('preview-pause');
+    var stopBtn = document.getElementById('preview-stop');
+    var timeDisplay = document.getElementById('preview-time');
+    var previewCaption = document.getElementById('preview-caption');
+
+    if (!previewSection || !playBtn) return;
+
+    // Show preview section when we have segments
+    if (segments.length > 0) {
+      previewSection.classList.remove('hidden');
+    }
+
+    // Play button
+    playBtn.addEventListener('click', function() {
+      startPreview();
+    });
+
+    // Pause button
+    pauseBtn.addEventListener('click', function() {
+      pausePreview();
+    });
+
+    // Stop button
+    stopBtn.addEventListener('click', function() {
+      stopPreview();
+    });
+
+    // Update preview when formatting changes
+    var formattingInputs = document.querySelectorAll('#caption-formatting-editor input, #caption-formatting-editor select');
+    formattingInputs.forEach(function(input) {
+      input.addEventListener('input', function() {
+        if (previewPlaying) {
+          updatePreviewCaption();
+        }
+      });
+    });
+  }
+
+  function startPreview() {
+    if (segments.length === 0) return;
+
+    previewPlaying = true;
+    previewTime = 0;
+    
+    document.getElementById('preview-play').classList.add('hidden');
+    document.getElementById('preview-pause').classList.remove('hidden');
+    
+    updatePreviewCaption();
+    
+    previewInterval = setInterval(function() {
+      previewTime += 0.1;
+      updatePreviewCaption();
+      updatePreviewTime();
+      
+      // Stop at end of last segment
+      var lastSegment = segments[segments.length - 1];
+      if (previewTime > lastSegment.end) {
+        stopPreview();
+      }
+    }, 100);
+  }
+
+  function pausePreview() {
+    previewPlaying = false;
+    clearInterval(previewInterval);
+    
+    document.getElementById('preview-play').classList.remove('hidden');
+    document.getElementById('preview-pause').classList.add('hidden');
+  }
+
+  function stopPreview() {
+    previewPlaying = false;
+    previewTime = 0;
+    clearInterval(previewInterval);
+    
+    document.getElementById('preview-play').classList.remove('hidden');
+    document.getElementById('preview-pause').classList.add('hidden');
+    
+    var previewCaption = document.getElementById('preview-caption');
+    if (previewCaption) {
+      previewCaption.style.display = 'none';
+    }
+    
+    updatePreviewTime();
+  }
+
+  function updatePreviewCaption() {
+    var previewCaption = document.getElementById('preview-caption');
+    if (!previewCaption) return;
+
+    // Find current segment
+    var currentSegment = null;
+    for (var i = 0; i < segments.length; i++) {
+      if (previewTime >= segments[i].start && previewTime <= segments[i].end) {
+        currentSegment = segments[i];
+        break;
+      }
+    }
+
+    if (currentSegment) {
+      previewCaption.style.display = 'block';
+      previewCaption.textContent = currentSegment.text;
+      
+      // Apply formatting
+      var formatting = getCaptionFormatting();
+      var globalFormatting = formatting.global;
+      var speakerFormatting = currentSegment.speaker ? formatting.speakers[currentSegment.speaker] : null;
+      
+      // Use speaker-specific formatting if available, otherwise global
+      var finalFormatting = speakerFormatting || globalFormatting;
+      
+      previewCaption.style.left = finalFormatting.x + '%';
+      previewCaption.style.top = finalFormatting.y + '%';
+      previewCaption.style.fontSize = finalFormatting.fontSize + 'px';
+      previewCaption.style.color = finalFormatting.color;
+      previewCaption.style.backgroundColor = finalFormatting.backgroundColor;
+      previewCaption.style.opacity = (finalFormatting.backgroundOpacity / 100);
+    } else {
+      previewCaption.style.display = 'none';
+    }
+  }
+
+  function updatePreviewTime() {
+    var timeDisplay = document.getElementById('preview-time');
+    if (timeDisplay) {
+      timeDisplay.textContent = previewTime.toFixed(1) + 's';
+    }
+  }
+
   return {
     init: init,
     setMode: setMode,
@@ -615,7 +759,11 @@ module.exports = function() {
     isSpeakerRecognitionEnabled: isSpeakerRecognitionEnabled,
     getCaptionFormatting: getCaptionFormatting,
     getWaveformPositioning: getWaveformPositioning,
-    getWaveformConfig: getWaveformConfig
+    getWaveformConfig: getWaveformConfig,
+    initPreview: initPreview,
+    startPreview: startPreview,
+    pausePreview: pausePreview,
+    stopPreview: stopPreview
   };
 
 };

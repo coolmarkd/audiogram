@@ -115,6 +115,9 @@ function submitted() {
 
   setClass("loading");
   d3.select("#loading-message").text("Uploading audio...");
+  
+  // Hide regenerate button during generation
+  d3.select("#regenerate").classed("hidden", true);
 
 	$.ajax({
 		url: config.baseUrl + "/submit/",
@@ -144,6 +147,9 @@ function poll(id) {
         if (result && result.status && result.status === "ready" && result.url) {
           video.update(result.url, preview.theme().name);
           setClass("rendered");
+          
+          // Show regenerate button
+          d3.select("#regenerate").classed("hidden", false);
         } else if (result.status === "error") {
           error(result.error);
         } else {
@@ -224,6 +230,10 @@ function initialize(err, themesWithImages) {
   });
 
   d3.select("#submit").on("click", submitted);
+  d3.select("#regenerate").on("click", function() {
+    d3.event.preventDefault();
+    regenerateVideo();
+  });
 
   // Initialize captions editor
   captionsEditor.init(function(action) {
@@ -232,6 +242,83 @@ function initialize(err, themesWithImages) {
     }
   });
 
+}
+
+function regenerateVideo() {
+  d3.event.preventDefault();
+
+  var theme = preview.theme(),
+      caption = preview.caption(),
+      selection = preview.selection(),
+      file = preview.file(),
+      captionMode = captionsEditor.getMode(),
+      timedCaptions = null;
+
+  if (!file) {
+    d3.select("#row-audio").classed("error", true);
+    return setClass("error", "No audio file selected.");
+  }
+
+  if (theme.maxDuration && selection.duration > theme.maxDuration) {
+    return setClass("error", "Your Audiogram must be under " + theme.maxDuration + " seconds.");
+  }
+
+  if (!theme || !theme.width || !theme.height) {
+    return setClass("error", "No valid theme detected.");
+  }
+
+  // Get timed captions if in auto mode
+  if (captionMode === "auto") {
+    timedCaptions = captionsEditor.getSegments();
+    if (!timedCaptions || timedCaptions.length === 0) {
+      return setClass("error", "Please generate captions first.");
+    }
+  }
+
+  video.kill();
+  audio.pause();
+
+  var formData = new FormData();
+
+  formData.append("audio", file);
+  if (selection.start || selection.end) {
+    formData.append("start", selection.start);
+    formData.append("end", selection.end);
+  }
+  formData.append("theme", JSON.stringify($.extend({}, theme, { backgroundImageFile: null })));
+  formData.append("captionMode", captionMode);
+  formData.append("regenerate", "true"); // Flag to indicate this is a regeneration
+  
+  if (captionMode === "static") {
+    formData.append("caption", caption);
+  } else {
+    formData.append("timedCaptions", JSON.stringify(timedCaptions));
+    formData.append("speakerNames", JSON.stringify(captionsEditor.getSpeakerNames()));
+    formData.append("speakerRecognitionEnabled", captionsEditor.isSpeakerRecognitionEnabled());
+    formData.append("captionFormatting", JSON.stringify(captionsEditor.getCaptionFormatting()));
+    formData.append("waveformPositioning", JSON.stringify(captionsEditor.getWaveformPositioning()));
+    formData.append("waveformConfig", JSON.stringify(captionsEditor.getWaveformConfig()));
+  }
+
+  setClass("loading");
+  d3.select("#loading-message").text("Regenerating video...");
+  
+  // Hide regenerate button during regeneration
+  d3.select("#regenerate").classed("hidden", true);
+
+  $.ajax({
+    url: config.baseUrl + "/submit/",
+    type: "POST",
+    data: formData,
+    contentType: false,
+    dataType: "json",
+    cache: false,
+    processData: false,
+    success: function(data){
+      poll(data.id, 0);
+    },
+    error: error
+  });
 }
 
 function transcribeAudio() {
