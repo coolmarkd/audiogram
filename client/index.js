@@ -2,7 +2,8 @@ var d3 = require("d3"),
     $ = require("jquery"),
     preview = require("./preview.js"),
     video = require("./video.js"),
-    audio = require("./audio.js");
+    audio = require("./audio.js"),
+    captionsEditor = require("./captions.js")();
 
 // Global configuration object
 var config = {
@@ -63,7 +64,9 @@ function submitted() {
   var theme = preview.theme(),
       caption = preview.caption(),
       selection = preview.selection(),
-      file = preview.file();
+      file = preview.file(),
+      captionMode = captionsEditor.getMode(),
+      timedCaptions = null;
 
   if (!file) {
     d3.select("#row-audio").classed("error", true);
@@ -78,6 +81,14 @@ function submitted() {
     return setClass("error", "No valid theme detected.");
   }
 
+  // Get timed captions if in auto mode
+  if (captionMode === "auto") {
+    timedCaptions = captionsEditor.getSegments();
+    if (!timedCaptions || timedCaptions.length === 0) {
+      return setClass("error", "Please generate captions first.");
+    }
+  }
+
   video.kill();
   audio.pause();
 
@@ -89,7 +100,13 @@ function submitted() {
     formData.append("end", selection.end);
   }
   formData.append("theme", JSON.stringify($.extend({}, theme, { backgroundImageFile: null })));
-  formData.append("caption", caption);
+  formData.append("captionMode", captionMode);
+  
+  if (captionMode === "static") {
+    formData.append("caption", caption);
+  } else {
+    formData.append("timedCaptions", JSON.stringify(timedCaptions));
+  }
 
   setClass("loading");
   d3.select("#loading-message").text("Uploading audio...");
@@ -203,6 +220,60 @@ function initialize(err, themesWithImages) {
 
   d3.select("#submit").on("click", submitted);
 
+  // Initialize captions editor
+  captionsEditor.init(function(action) {
+    if (action === "transcribe") {
+      transcribeAudio();
+    }
+  });
+
+}
+
+function transcribeAudio() {
+  var file = preview.file();
+  
+  if (!file) {
+    return setClass("error", "No audio file selected.");
+  }
+
+  setClass("loading");
+  d3.select("#loading-message").text("Transcribing audio...");
+
+  // First, upload the audio if not already uploaded
+  var formData = new FormData();
+  formData.append("audio", file);
+  formData.append("theme", JSON.stringify(preview.theme()));
+
+  $.ajax({
+    url: config.baseUrl + "/submit/",
+    type: "POST",
+    data: formData,
+    contentType: false,
+    dataType: "json",
+    cache: false,
+    processData: false,
+    success: function(data) {
+      // Now transcribe
+      $.ajax({
+        url: config.baseUrl + "/transcribe/" + data.id + "/",
+        type: "POST",
+        dataType: "json",
+        success: function(result) {
+          if (result && result.segments) {
+            captionsEditor.setSegments(result.segments);
+            setClass(null);
+            d3.select("#loading-message").text("Loading...");
+          } else {
+            error("No transcription results");
+          }
+        },
+        error: function(err) {
+          error("Transcription failed: " + (err.responseJSON?.error || err.statusText));
+        }
+      });
+    },
+    error: error
+  });
 }
 
 function updateAudioFile() {

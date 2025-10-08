@@ -23,10 +23,15 @@ function drawFrames(renderer, options, cb) {
     var canvas = canvases.pop(),
         context = canvas.getContext("2d");
 
+    // Calculate current time for this frame
+    var currentTime = frameNumber / (options.framesPerSecond || 20);
+
     renderer.drawFrame(context, {
       caption: options.caption,
       waveform: options.waveform[frameNumber],
-      frame: frameNumber
+      frame: frameNumber,
+      currentTime: currentTime,
+      timedCaptions: options.timedCaptions
     });
 
     canvas.toBuffer(function(err, buf){

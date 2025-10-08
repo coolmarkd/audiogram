@@ -11,7 +11,8 @@ var logger = require("../lib/logger/"),
     render = require("./render.js"),
     status = require("./status.js"),
     fonts = require("./fonts.js"),
-    errorHandlers = require("./error.js");
+    errorHandlers = require("./error.js"),
+    transcribe = require("../lib/transcribe.js");
 
 // Settings
 var serverSettings = require("../lib/settings/");
@@ -65,6 +66,24 @@ if (serverSettings.fonts) {
 
 // Check the status of a current video
 app.get("/status/:id/", status);
+
+// Transcribe audio file
+app.post("/transcribe/:id/", function(req, res) {
+  var id = req.params.id;
+  var audioPath = path.join(serverSettings.workingDirectory, id, "audio");
+  
+  console.log("Transcription requested for:", id);
+  
+  transcribe.transcribe(audioPath, {}, function(err, segments) {
+    if (err) {
+      console.error("Transcription error:", err);
+      return res.status(500).json({ error: err.message || "Transcription failed" });
+    }
+    
+    console.log("Transcription complete:", segments.length, "segments");
+    res.json({ segments: segments });
+  });
+});
 
 // Serve configuration for client-side JavaScript
 app.get("/config.json", function(req, res) {

@@ -29,12 +29,32 @@
           <label for="input-theme">Theme</label>
           <select id="input-theme" name="theme"></select>
         </div>
+        <div class="row form-row" id="row-caption-mode">
+          <label for="caption-mode-static">Caption Mode</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" id="caption-mode-static" name="captionMode" value="static" checked />
+              <span>Static Caption</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" id="caption-mode-auto" name="captionMode" value="auto" />
+              <span>Auto-Generate (Transcribe)</span>
+            </label>
+          </div>
+        </div>
         <div class="row form-row" id="row-caption">
           <label for="input-caption">
             Caption
             <div class="note">Add two spaces in a row to force a line break.</div>
           </label>
           <input id="input-caption" name="caption" type="text" autocomplete="off" placeholder="Add a caption" />
+        </div>
+        <div id="captions-editor" class="hidden">
+          <div id="captions-header">
+            <h3>Timed Captions</h3>
+            <button id="transcribe-btn" class="button">Generate Captions</button>
+          </div>
+          <div id="captions-list"></div>
         </div>
         <div id="preview">
           <div style="background-color: black;">

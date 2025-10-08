@@ -13,7 +13,15 @@
     "captionLineHeight": 52,
     "captionLineSpacing": 7,
     "captionLeft": 200,
-    "captionRight": 1080
+    "captionRight": 1080,
+    "subtitleBottom": 650,
+    "subtitleFont": "400 42px 'Source Sans Pro'",
+    "subtitleLineHeight": 42,
+    "subtitleLineSpacing": 5,
+    "subtitleLeft": 100,
+    "subtitleRight": 1180,
+    "subtitleBackgroundColor": "rgba(0,0,0,0.7)",
+    "subtitlePadding": 10
   },
   "Basic": {
     "backgroundColor": "#eee",

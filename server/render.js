@@ -30,6 +30,18 @@ function validate(req, res, next) {
     req.body.end = +req.body.end;
   }
 
+  // Handle caption mode
+  req.body.captionMode = req.body.captionMode || "static";
+
+  // Parse timed captions if provided
+  if (req.body.timedCaptions) {
+    try {
+      req.body.timedCaptions = JSON.parse(req.body.timedCaptions);
+    } catch(e) {
+      return res.status(500).send("Invalid timed captions data.");
+    }
+  }
+
   return next();
 
 }
