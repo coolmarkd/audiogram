@@ -39,6 +39,9 @@ function validate(req, res, next) {
   // Handle disfluencies flag
   req.body.disfluenciesEnabled = req.body.disfluenciesEnabled === "true" || req.body.disfluenciesEnabled === true;
 
+  // Handle speech model
+  req.body.speechModel = req.body.speechModel || "universal";
+
   // Handle speaker count settings
   req.body.speakerCountType = req.body.speakerCountType || "auto";
   req.body.speakerCountValue = req.body.speakerCountValue ? parseInt(req.body.speakerCountValue) : 2;

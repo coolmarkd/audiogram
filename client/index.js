@@ -364,6 +364,7 @@ function transcribeAudio() {
   formData.append("speakerCountType", captionsEditor.getSpeakerCountType());
   formData.append("speakerCountValue", captionsEditor.getSpeakerCountValue());
   formData.append("keyterms", JSON.stringify(captionsEditor.getKeyterms()));
+  formData.append("speechModel", captionsEditor.getSpeechModel());
 
   $.ajax({
     url: config.baseUrl + "/submit/",

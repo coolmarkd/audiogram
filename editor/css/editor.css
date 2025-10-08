@@ -227,6 +227,27 @@ input[type='text'] {
   margin-bottom: 0.5rem;
 }
 
+.speech-model-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.speech-model-section label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.speech-model-section select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 0.5rem;
+}
+
 .speaker-count-input {
   margin-top: 0.5rem;
 }

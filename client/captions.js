@@ -15,6 +15,7 @@ module.exports = function() {
       speakerCountType = "auto", // "auto", "minimum", or "exact"
       speakerCountValue = 2, // Number of speakers
       keyterms = [], // Array of keyterms for transcription accuracy
+      speechModel = "universal", // "universal" or "slam-1"
       captionFormatting = {
         global: {
           x: 50,
@@ -91,6 +92,12 @@ module.exports = function() {
     // Set up disfluencies toggle
     d3.select("#enable-disfluencies").on("change", function() {
       disfluenciesEnabled = this.checked;
+      if (onUpdate) onUpdate();
+    });
+
+    // Set up speech model selector
+    d3.select("#speech-model").on("change", function() {
+      speechModel = this.value;
       if (onUpdate) onUpdate();
     });
 
@@ -489,6 +496,10 @@ module.exports = function() {
 
   function getKeyterms() {
     return keyterms;
+  }
+
+  function getSpeechModel() {
+    return speechModel;
   }
 
   function switchFormattingTab(tab) {
@@ -1082,6 +1093,7 @@ module.exports = function() {
     getSpeakerCountType: getSpeakerCountType,
     getSpeakerCountValue: getSpeakerCountValue,
     getKeyterms: getKeyterms,
+    getSpeechModel: getSpeechModel,
     getCaptionFormatting: getCaptionFormatting,
     getWaveformPositioning: getWaveformPositioning,
     getWaveformConfig: getWaveformConfig,
