@@ -66,6 +66,147 @@
             <h4>Speaker Names</h4>
             <div id="speaker-names-list"></div>
           </div>
+          <div id="caption-formatting-editor" class="hidden">
+            <h4>Caption Formatting</h4>
+            <div id="formatting-tabs">
+              <button class="formatting-tab active" data-tab="global">Global</button>
+              <button class="formatting-tab" data-tab="speakers">Per Speaker</button>
+            </div>
+            <div id="global-formatting" class="formatting-panel active">
+              <div class="formatting-group">
+                <label>Position</label>
+                <div class="position-controls">
+                  <div class="control-row">
+                    <label>X Position:</label>
+                    <input type="range" id="caption-x" min="0" max="100" value="50" step="1">
+                    <span id="caption-x-value">50%</span>
+                  </div>
+                  <div class="control-row">
+                    <label>Y Position:</label>
+                    <input type="range" id="caption-y" min="0" max="100" value="85" step="1">
+                    <span id="caption-y-value">85%</span>
+                  </div>
+                </div>
+              </div>
+              <div class="formatting-group">
+                <label>Font</label>
+                <div class="font-controls">
+                  <div class="control-row">
+                    <label>Size:</label>
+                    <input type="range" id="caption-font-size" min="12" max="72" value="42" step="2">
+                    <span id="caption-font-size-value">42px</span>
+                  </div>
+                  <div class="control-row">
+                    <label>Color:</label>
+                    <input type="color" id="caption-color" value="#ffffff">
+                  </div>
+                  <div class="control-row">
+                    <label>Background:</label>
+                    <input type="color" id="caption-bg-color" value="#000000">
+                    <input type="range" id="caption-bg-opacity" min="0" max="100" value="70" step="5">
+                    <span id="caption-bg-opacity-value">70%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="speakers-formatting" class="formatting-panel">
+              <div id="speaker-formatting-list"></div>
+            </div>
+          </div>
+          <div id="waveform-positioning-editor" class="hidden">
+            <h4>Waveform Configuration</h4>
+            <div id="waveform-tabs">
+              <button class="waveform-tab active" data-tab="position">Position</button>
+              <button class="waveform-tab" data-tab="style">Style</button>
+            </div>
+            <div id="waveform-position" class="waveform-panel active">
+              <div class="formatting-group">
+                <div class="position-controls">
+                  <div class="control-row">
+                    <label>X Position:</label>
+                    <input type="range" id="waveform-x" min="0" max="100" value="50" step="1">
+                    <span id="waveform-x-value">50%</span>
+                  </div>
+                  <div class="control-row">
+                    <label>Y Position:</label>
+                    <input type="range" id="waveform-y" min="0" max="100" value="50" step="1">
+                    <span id="waveform-y-value">50%</span>
+                  </div>
+                  <div class="control-row">
+                    <label>Width:</label>
+                    <input type="range" id="waveform-width" min="20" max="100" value="80" step="5">
+                    <span id="waveform-width-value">80%</span>
+                  </div>
+                  <div class="control-row">
+                    <label>Height:</label>
+                    <input type="range" id="waveform-height" min="10" max="50" value="20" step="2">
+                    <span id="waveform-height-value">20%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="waveform-style" class="waveform-panel">
+              <div class="formatting-group">
+                <label>Waveform Type</label>
+                <div class="waveform-type-controls">
+                  <div class="control-row">
+                    <label>Style:</label>
+                    <select id="waveform-type">
+                      <option value="bars">Bars</option>
+                      <option value="line">Line</option>
+                      <option value="area">Area</option>
+                      <option value="dots">Dots</option>
+                      <option value="wave">Wave</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="formatting-group">
+                <label>Colors</label>
+                <div class="color-controls">
+                  <div class="control-row">
+                    <label>Primary Color:</label>
+                    <input type="color" id="waveform-color" value="#ffffff">
+                  </div>
+                  <div class="control-row">
+                    <label>Secondary Color:</label>
+                    <input type="color" id="waveform-color-secondary" value="#cccccc">
+                  </div>
+                  <div class="control-row">
+                    <label>Background:</label>
+                    <input type="color" id="waveform-bg-color" value="#000000">
+                    <input type="range" id="waveform-bg-opacity" min="0" max="100" value="0" step="5">
+                    <span id="waveform-bg-opacity-value">0%</span>
+                  </div>
+                </div>
+              </div>
+              <div class="formatting-group">
+                <label>Advanced</label>
+                <div class="advanced-controls">
+                  <div class="control-row">
+                    <label>Bar Spacing:</label>
+                    <input type="range" id="waveform-spacing" min="0" max="10" value="1" step="0.5">
+                    <span id="waveform-spacing-value">1px</span>
+                  </div>
+                  <div class="control-row">
+                    <label>Line Width:</label>
+                    <input type="range" id="waveform-line-width" min="1" max="10" value="2" step="0.5">
+                    <span id="waveform-line-width-value">2px</span>
+                  </div>
+                  <div class="control-row">
+                    <label>Dot Size:</label>
+                    <input type="range" id="waveform-dot-size" min="1" max="20" value="3" step="1">
+                    <span id="waveform-dot-size-value">3px</span>
+                  </div>
+                  <div class="control-row">
+                    <label>Smoothing:</label>
+                    <input type="range" id="waveform-smoothing" min="0" max="100" value="0" step="5">
+                    <span id="waveform-smoothing-value">0%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <div id="captions-list"></div>
         </div>
         <div id="preview">

@@ -345,6 +345,220 @@ input[type='text'] {
   margin-left: 4px;
 }
 
+/* Caption formatting editor */
+#caption-formatting-editor {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+}
+
+#caption-formatting-editor h4 {
+  margin: 0 0 1rem 0;
+  font-size: 16px;
+  color: #495057;
+}
+
+#formatting-tabs {
+  display: flex;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.formatting-tab {
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #6c757d;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.formatting-tab.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+}
+
+.formatting-tab:hover {
+  color: #007bff;
+}
+
+.formatting-panel {
+  display: none;
+}
+
+.formatting-panel.active {
+  display: block;
+}
+
+.formatting-group {
+  margin-bottom: 1.5rem;
+}
+
+.formatting-group > label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #495057;
+  font-size: 14px;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  gap: 10px;
+}
+
+.control-row label {
+  min-width: 80px;
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0;
+}
+
+.control-row input[type="range"] {
+  flex-grow: 1;
+  margin: 0 8px;
+}
+
+.control-row input[type="color"] {
+  width: 40px;
+  height: 30px;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.control-row span {
+  min-width: 50px;
+  font-size: 12px;
+  color: #6c757d;
+  text-align: right;
+}
+
+.position-controls, .font-controls {
+  padding: 0.5rem;
+  background-color: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 3px;
+}
+
+/* Waveform positioning editor */
+#waveform-positioning-editor {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #e8f4fd;
+  border: 1px solid #b8daff;
+  border-radius: 4px;
+}
+
+#waveform-positioning-editor h4 {
+  margin: 0 0 1rem 0;
+  font-size: 16px;
+  color: #004085;
+}
+
+/* Speaker formatting list */
+#speaker-formatting-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.speaker-formatting-item {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+}
+
+.speaker-formatting-item h5 {
+  margin: 0 0 0.5rem 0;
+  font-size: 14px;
+  color: #495057;
+  font-weight: 600;
+}
+
+.speaker-formatting-item .formatting-group {
+  margin-bottom: 1rem;
+}
+
+.speaker-formatting-item .formatting-group:last-child {
+  margin-bottom: 0;
+}
+
+/* Waveform configuration tabs */
+#waveform-tabs {
+  display: flex;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #b8daff;
+}
+
+.waveform-tab {
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #6c757d;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.waveform-tab.active {
+  color: #004085;
+  border-bottom-color: #004085;
+}
+
+.waveform-tab:hover {
+  color: #004085;
+}
+
+.waveform-panel {
+  display: none;
+}
+
+.waveform-panel.active {
+  display: block;
+}
+
+/* Waveform type controls */
+.waveform-type-controls {
+  padding: 0.5rem;
+  background-color: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 3px;
+}
+
+.waveform-type-controls select {
+  padding: 4px 8px;
+  font-size: 14px;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  background-color: #fff;
+  min-width: 120px;
+}
+
+/* Color controls */
+.color-controls {
+  padding: 0.5rem;
+  background-color: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 3px;
+}
+
+/* Advanced controls */
+.advanced-controls {
+  padding: 0.5rem;
+  background-color: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 3px;
+}
+
 /* Preview canvas */
 #canvas {
   position: relative;

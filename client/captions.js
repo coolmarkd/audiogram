@@ -7,7 +7,35 @@ module.exports = function() {
       captionMode = "static",
       onUpdate = null,
       speakerNames = {}, // Map of speaker labels to custom names
-      speakerRecognitionEnabled = true; // Whether speaker recognition is enabled
+      speakerRecognitionEnabled = true, // Whether speaker recognition is enabled
+      captionFormatting = {
+        global: {
+          x: 50,
+          y: 85,
+          fontSize: 42,
+          color: "#ffffff",
+          backgroundColor: "#000000",
+          backgroundOpacity: 70
+        },
+        speakers: {}
+      },
+      waveformPositioning = {
+        x: 50,
+        y: 50,
+        width: 80,
+        height: 20
+      },
+      waveformConfig = {
+        type: "bars",
+        color: "#ffffff",
+        colorSecondary: "#cccccc",
+        backgroundColor: "#000000",
+        backgroundOpacity: 0,
+        spacing: 1,
+        lineWidth: 2,
+        dotSize: 3,
+        smoothing: 0
+      };
 
   function init(updateCallback) {
     onUpdate = updateCallback;
@@ -25,6 +53,21 @@ module.exports = function() {
       updateSpeakerRecognitionUI();
       if (onUpdate) onUpdate();
     });
+
+    // Set up formatting tabs
+    d3.selectAll(".formatting-tab").on("click", function() {
+      var tab = d3.select(this).attr("data-tab");
+      switchFormattingTab(tab);
+    });
+
+    // Set up caption formatting controls
+    setupCaptionFormattingControls();
+
+    // Set up waveform positioning controls
+    setupWaveformPositioningControls();
+
+    // Set up waveform configuration controls
+    setupWaveformConfigControls();
 
     // Set up transcribe button
     d3.select("#transcribe-btn").on("click", function() {
@@ -50,11 +93,22 @@ module.exports = function() {
   function updateSpeakerRecognitionUI() {
     var isAuto = captionMode === "auto";
     var speakerEditor = d3.select("#speaker-names-editor");
+    var formattingEditor = d3.select("#caption-formatting-editor");
+    var waveformEditor = d3.select("#waveform-positioning-editor");
     
-    if (isAuto && speakerRecognitionEnabled) {
-      speakerEditor.classed("hidden", false);
+    if (isAuto) {
+      formattingEditor.classed("hidden", false);
+      waveformEditor.classed("hidden", false);
+      
+      if (speakerRecognitionEnabled) {
+        speakerEditor.classed("hidden", false);
+      } else {
+        speakerEditor.classed("hidden", true);
+      }
     } else {
       speakerEditor.classed("hidden", true);
+      formattingEditor.classed("hidden", true);
+      waveformEditor.classed("hidden", true);
     }
   }
 
@@ -234,6 +288,282 @@ module.exports = function() {
     return speakerRecognitionEnabled;
   }
 
+  function switchFormattingTab(tab) {
+    // Update tab buttons
+    d3.selectAll(".formatting-tab").classed("active", false);
+    d3.select(".formatting-tab[data-tab='" + tab + "']").classed("active", true);
+    
+    // Update panels
+    d3.selectAll(".formatting-panel").classed("active", false);
+    d3.select("#" + tab + "-formatting").classed("active", true);
+  }
+
+  function setupCaptionFormattingControls() {
+    // Global caption formatting
+    d3.select("#caption-x").on("input", function() {
+      captionFormatting.global.x = +this.value;
+      d3.select("#caption-x-value").text(this.value + "%");
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#caption-y").on("input", function() {
+      captionFormatting.global.y = +this.value;
+      d3.select("#caption-y-value").text(this.value + "%");
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#caption-font-size").on("input", function() {
+      captionFormatting.global.fontSize = +this.value;
+      d3.select("#caption-font-size-value").text(this.value + "px");
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#caption-color").on("change", function() {
+      captionFormatting.global.color = this.value;
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#caption-bg-color").on("change", function() {
+      captionFormatting.global.backgroundColor = this.value;
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#caption-bg-opacity").on("input", function() {
+      captionFormatting.global.backgroundOpacity = +this.value;
+      d3.select("#caption-bg-opacity-value").text(this.value + "%");
+      if (onUpdate) onUpdate();
+    });
+  }
+
+  function setupWaveformPositioningControls() {
+    d3.select("#waveform-x").on("input", function() {
+      waveformPositioning.x = +this.value;
+      d3.select("#waveform-x-value").text(this.value + "%");
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#waveform-y").on("input", function() {
+      waveformPositioning.y = +this.value;
+      d3.select("#waveform-y-value").text(this.value + "%");
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#waveform-width").on("input", function() {
+      waveformPositioning.width = +this.value;
+      d3.select("#waveform-width-value").text(this.value + "%");
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#waveform-height").on("input", function() {
+      waveformPositioning.height = +this.value;
+      d3.select("#waveform-height-value").text(this.value + "%");
+      if (onUpdate) onUpdate();
+    });
+  }
+
+  function setupWaveformConfigControls() {
+    // Set up waveform tabs
+    d3.selectAll(".waveform-tab").on("click", function() {
+      var tab = d3.select(this).attr("data-tab");
+      switchWaveformTab(tab);
+    });
+
+    // Waveform type
+    d3.select("#waveform-type").on("change", function() {
+      waveformConfig.type = this.value;
+      if (onUpdate) onUpdate();
+    });
+
+    // Colors
+    d3.select("#waveform-color").on("change", function() {
+      waveformConfig.color = this.value;
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#waveform-color-secondary").on("change", function() {
+      waveformConfig.colorSecondary = this.value;
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#waveform-bg-color").on("change", function() {
+      waveformConfig.backgroundColor = this.value;
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#waveform-bg-opacity").on("input", function() {
+      waveformConfig.backgroundOpacity = +this.value;
+      d3.select("#waveform-bg-opacity-value").text(this.value + "%");
+      if (onUpdate) onUpdate();
+    });
+
+    // Advanced controls
+    d3.select("#waveform-spacing").on("input", function() {
+      waveformConfig.spacing = +this.value;
+      d3.select("#waveform-spacing-value").text(this.value + "px");
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#waveform-line-width").on("input", function() {
+      waveformConfig.lineWidth = +this.value;
+      d3.select("#waveform-line-width-value").text(this.value + "px");
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#waveform-dot-size").on("input", function() {
+      waveformConfig.dotSize = +this.value;
+      d3.select("#waveform-dot-size-value").text(this.value + "px");
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#waveform-smoothing").on("input", function() {
+      waveformConfig.smoothing = +this.value;
+      d3.select("#waveform-smoothing-value").text(this.value + "%");
+      if (onUpdate) onUpdate();
+    });
+  }
+
+  function switchWaveformTab(tab) {
+    // Update tab buttons
+    d3.selectAll(".waveform-tab").classed("active", false);
+    d3.select(".waveform-tab[data-tab='" + tab + "']").classed("active", true);
+    
+    // Update panels
+    d3.selectAll(".waveform-panel").classed("active", false);
+    d3.select("#waveform-" + tab).classed("active", true);
+  }
+
+  function renderSpeakerFormattingEditor() {
+    var uniqueSpeakers = getUniqueSpeakers();
+    var container = d3.select("#speaker-formatting-list");
+    container.html("");
+
+    uniqueSpeakers.forEach(function(speaker) {
+      var speakerName = speakerNames[speaker] || speaker;
+      
+      // Initialize speaker formatting if not exists
+      if (!captionFormatting.speakers[speaker]) {
+        captionFormatting.speakers[speaker] = {
+          x: captionFormatting.global.x,
+          y: captionFormatting.global.y,
+          fontSize: captionFormatting.global.fontSize,
+          color: captionFormatting.global.color,
+          backgroundColor: captionFormatting.global.backgroundColor,
+          backgroundOpacity: captionFormatting.global.backgroundOpacity
+        };
+      }
+
+      var item = container.append("div")
+        .attr("class", "speaker-formatting-item");
+
+      item.append("h5").text(speakerName);
+
+      // Position controls
+      var positionGroup = item.append("div").attr("class", "formatting-group");
+      positionGroup.append("label").text("Position");
+      var positionControls = positionGroup.append("div").attr("class", "position-controls");
+
+      var xRow = positionControls.append("div").attr("class", "control-row");
+      xRow.append("label").text("X Position:");
+      var xSlider = xRow.append("input")
+        .attr("type", "range")
+        .attr("min", 0)
+        .attr("max", 100)
+        .attr("value", captionFormatting.speakers[speaker].x)
+        .attr("step", 1);
+      var xValue = xRow.append("span").text(captionFormatting.speakers[speaker].x + "%");
+
+      xSlider.on("input", function() {
+        captionFormatting.speakers[speaker].x = +this.value;
+        xValue.text(this.value + "%");
+        if (onUpdate) onUpdate();
+      });
+
+      var yRow = positionControls.append("div").attr("class", "control-row");
+      yRow.append("label").text("Y Position:");
+      var ySlider = yRow.append("input")
+        .attr("type", "range")
+        .attr("min", 0)
+        .attr("max", 100)
+        .attr("value", captionFormatting.speakers[speaker].y)
+        .attr("step", 1);
+      var yValue = yRow.append("span").text(captionFormatting.speakers[speaker].y + "%");
+
+      ySlider.on("input", function() {
+        captionFormatting.speakers[speaker].y = +this.value;
+        yValue.text(this.value + "%");
+        if (onUpdate) onUpdate();
+      });
+
+      // Font controls
+      var fontGroup = item.append("div").attr("class", "formatting-group");
+      fontGroup.append("label").text("Font");
+      var fontControls = fontGroup.append("div").attr("class", "font-controls");
+
+      var sizeRow = fontControls.append("div").attr("class", "control-row");
+      sizeRow.append("label").text("Size:");
+      var sizeSlider = sizeRow.append("input")
+        .attr("type", "range")
+        .attr("min", 12)
+        .attr("max", 72)
+        .attr("value", captionFormatting.speakers[speaker].fontSize)
+        .attr("step", 2);
+      var sizeValue = sizeRow.append("span").text(captionFormatting.speakers[speaker].fontSize + "px");
+
+      sizeSlider.on("input", function() {
+        captionFormatting.speakers[speaker].fontSize = +this.value;
+        sizeValue.text(this.value + "px");
+        if (onUpdate) onUpdate();
+      });
+
+      var colorRow = fontControls.append("div").attr("class", "control-row");
+      colorRow.append("label").text("Color:");
+      var colorInput = colorRow.append("input")
+        .attr("type", "color")
+        .attr("value", captionFormatting.speakers[speaker].color);
+
+      colorInput.on("change", function() {
+        captionFormatting.speakers[speaker].color = this.value;
+        if (onUpdate) onUpdate();
+      });
+
+      var bgRow = fontControls.append("div").attr("class", "control-row");
+      bgRow.append("label").text("Background:");
+      var bgColorInput = bgRow.append("input")
+        .attr("type", "color")
+        .attr("value", captionFormatting.speakers[speaker].backgroundColor);
+      var bgOpacitySlider = bgRow.append("input")
+        .attr("type", "range")
+        .attr("min", 0)
+        .attr("max", 100)
+        .attr("value", captionFormatting.speakers[speaker].backgroundOpacity)
+        .attr("step", 5);
+      var bgOpacityValue = bgRow.append("span").text(captionFormatting.speakers[speaker].backgroundOpacity + "%");
+
+      bgColorInput.on("change", function() {
+        captionFormatting.speakers[speaker].backgroundColor = this.value;
+        if (onUpdate) onUpdate();
+      });
+
+      bgOpacitySlider.on("input", function() {
+        captionFormatting.speakers[speaker].backgroundOpacity = +this.value;
+        bgOpacityValue.text(this.value + "%");
+        if (onUpdate) onUpdate();
+      });
+    });
+  }
+
+  function getCaptionFormatting() {
+    return captionFormatting;
+  }
+
+  function getWaveformPositioning() {
+    return waveformPositioning;
+  }
+
+  function getWaveformConfig() {
+    return waveformConfig;
+  }
+
   function renderSpeakerNamesEditor() {
     var uniqueSpeakers = getUniqueSpeakers();
     var speakerEditor = d3.select("#speaker-names-editor");
@@ -265,7 +595,11 @@ module.exports = function() {
       .on("input", function(speaker) {
         var newName = d3.select(this).property("value");
         setSpeakerName(speaker, newName);
+        renderSpeakerFormattingEditor(); // Update formatting editor with new names
       });
+
+    // Also render speaker formatting editor
+    renderSpeakerFormattingEditor();
   }
 
   return {
@@ -278,7 +612,10 @@ module.exports = function() {
     getSpeakerNames: getSpeakerNames,
     setSpeakerName: setSpeakerName,
     getUniqueSpeakers: getUniqueSpeakers,
-    isSpeakerRecognitionEnabled: isSpeakerRecognitionEnabled
+    isSpeakerRecognitionEnabled: isSpeakerRecognitionEnabled,
+    getCaptionFormatting: getCaptionFormatting,
+    getWaveformPositioning: getWaveformPositioning,
+    getWaveformConfig: getWaveformConfig
   };
 
 };

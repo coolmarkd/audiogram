@@ -51,6 +51,33 @@ function validate(req, res, next) {
     }
   }
 
+  // Parse caption formatting if provided
+  if (req.body.captionFormatting) {
+    try {
+      req.body.captionFormatting = JSON.parse(req.body.captionFormatting);
+    } catch(e) {
+      return res.status(500).send("Invalid caption formatting data.");
+    }
+  }
+
+  // Parse waveform positioning if provided
+  if (req.body.waveformPositioning) {
+    try {
+      req.body.waveformPositioning = JSON.parse(req.body.waveformPositioning);
+    } catch(e) {
+      return res.status(500).send("Invalid waveform positioning data.");
+    }
+  }
+
+  // Parse waveform configuration if provided
+  if (req.body.waveformConfig) {
+    try {
+      req.body.waveformConfig = JSON.parse(req.body.waveformConfig);
+    } catch(e) {
+      return res.status(500).send("Invalid waveform configuration data.");
+    }
+  }
+
   return next();
 
 }

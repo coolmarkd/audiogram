@@ -90,6 +90,14 @@ When in Auto-Generate mode, you'll see:
   - Speaker A: [Host]
   - Speaker B: [Guest]
   - Speaker C: [Moderator]
+- **Caption Formatting Editor**: 
+  - **Global Tab**: Format all captions (position, font, colors)
+  - **Per Speaker Tab**: Customize each speaker individually
+  - **Real-time preview** of formatting changes
+- **Waveform Positioning Editor**: 
+  - **Position**: X/Y coordinates (0-100%)
+  - **Size**: Width and height controls
+  - **Independent** of caption formatting
 - **Caption Segments List**: Each segment shows:
   - Timestamp range (start → end)
   - Speaker selector dropdown (if speaker recognition enabled)

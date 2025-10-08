@@ -108,6 +108,9 @@ function submitted() {
     formData.append("timedCaptions", JSON.stringify(timedCaptions));
     formData.append("speakerNames", JSON.stringify(captionsEditor.getSpeakerNames()));
     formData.append("speakerRecognitionEnabled", captionsEditor.isSpeakerRecognitionEnabled());
+    formData.append("captionFormatting", JSON.stringify(captionsEditor.getCaptionFormatting()));
+    formData.append("waveformPositioning", JSON.stringify(captionsEditor.getWaveformPositioning()));
+    formData.append("waveformConfig", JSON.stringify(captionsEditor.getWaveformConfig()));
   }
 
   setClass("loading");

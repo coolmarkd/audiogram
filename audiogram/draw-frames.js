@@ -32,7 +32,10 @@ function drawFrames(renderer, options, cb) {
       frame: frameNumber,
       currentTime: currentTime,
       timedCaptions: options.timedCaptions,
-      speakerNames: options.speakerNames
+      speakerNames: options.speakerNames,
+      captionFormatting: options.captionFormatting,
+      waveformPositioning: options.waveformPositioning,
+      waveformConfig: options.waveformConfig
     });
 
     canvas.toBuffer(function(err, buf){
