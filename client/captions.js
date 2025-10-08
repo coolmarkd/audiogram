@@ -50,6 +50,11 @@ module.exports = function() {
       captionMode = this.value;
       updateUI();
       if (onUpdate) onUpdate();
+      
+      // Trigger preview redraw when caption mode changes
+      if (window.preview && window.preview.redraw) {
+        window.preview.redraw();
+      }
     });
 
     // Set up speaker recognition toggle
@@ -93,6 +98,16 @@ module.exports = function() {
     // Show/hide appropriate UI elements
     d3.select("#row-caption").classed("hidden", isAuto);
     d3.select("#captions-editor").classed("hidden", !isAuto);
+    
+    // Clear static caption when switching to auto mode
+    if (isAuto) {
+      d3.select("#input-caption").property("value", "");
+      // Also clear the preview caption
+      if (window.preview) {
+        window.preview.caption("");
+      }
+    }
+    
     if (isAuto) {
       updateSpeakerRecognitionUI();
     }

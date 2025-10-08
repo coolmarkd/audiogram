@@ -72,7 +72,7 @@ module.exports = function(t) {
     }
 
     // Write the caption (static or timed)
-    var captionText = options.caption;
+    var captionText = null;
     var useSubtitleStyle = false;
     
     // If timed captions are provided, find the one for this frame
@@ -92,9 +92,11 @@ module.exports = function(t) {
           captionText = segment.text;
         }
         useSubtitleStyle = true;
-      } else {
-        captionText = null;
       }
+      // When timed captions are present, never show static caption
+    } else {
+      // Only show static caption when no timed captions are provided
+      captionText = options.caption;
     }
     
     if (captionText) {

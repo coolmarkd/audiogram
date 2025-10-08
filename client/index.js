@@ -241,6 +241,10 @@ function initialize(err, themesWithImages) {
       transcribeAudio();
     }
   });
+  
+  // Make captionsEditor and preview globally accessible
+  window.captionsEditor = captionsEditor;
+  window.preview = preview;
 
 }
 

@@ -78,8 +78,14 @@ function redraw() {
 
   renderer.backgroundImage(theme.backgroundImageFile || null);
 
+  // Get current caption mode from captions editor
+  var captionMode = window.captionsEditor ? window.captionsEditor.getMode() : "static";
+  
+  // Only show static caption if not in auto mode
+  var captionToShow = (captionMode === "auto") ? null : caption;
+
   renderer.drawFrame(context, {
-    caption: caption,
+    caption: captionToShow,
     waveform: sampleWave,
     frame: 0
   });
@@ -111,5 +117,6 @@ module.exports = {
   theme: _theme,
   file: _file,
   selection: _selection,
-  loadAudio: loadAudio
+  loadAudio: loadAudio,
+  redraw: redraw
 };
