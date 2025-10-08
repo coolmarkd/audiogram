@@ -78,7 +78,7 @@ module.exports = function(t) {
         return seg.start <= options.currentTime && options.currentTime < seg.end;
       });
       if (segment) {
-        // Include speaker name if available
+        // Include speaker name if available and speaker recognition is enabled
         if (segment.speaker && options.speakerNames && options.speakerNames[segment.speaker]) {
           captionText = options.speakerNames[segment.speaker] + ": " + segment.text;
         } else if (segment.speaker) {
@@ -117,9 +117,9 @@ module.exports = function(t) {
     var speakerColor = null;
     var displayText = text;
     
-    if (text.indexOf(": ") > 0) {
+    if (text.indexOf(": ") > 0 && theme.speakerColors) {
       var speakerMatch = text.match(/^([^:]+):\s*(.*)$/);
-      if (speakerMatch && theme.speakerColors) {
+      if (speakerMatch) {
         var speakerName = speakerMatch[1];
         var speakerText = speakerMatch[2];
         

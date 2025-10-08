@@ -6,7 +6,8 @@ module.exports = function() {
   var segments = [],
       captionMode = "static",
       onUpdate = null,
-      speakerNames = {}; // Map of speaker labels to custom names
+      speakerNames = {}, // Map of speaker labels to custom names
+      speakerRecognitionEnabled = true; // Whether speaker recognition is enabled
 
   function init(updateCallback) {
     onUpdate = updateCallback;
@@ -18,6 +19,13 @@ module.exports = function() {
       if (onUpdate) onUpdate();
     });
 
+    // Set up speaker recognition toggle
+    d3.select("#enable-speaker-recognition").on("change", function() {
+      speakerRecognitionEnabled = this.checked;
+      updateSpeakerRecognitionUI();
+      if (onUpdate) onUpdate();
+    });
+
     // Set up transcribe button
     d3.select("#transcribe-btn").on("click", function() {
       d3.event.preventDefault();
@@ -25,6 +33,7 @@ module.exports = function() {
     });
 
     updateUI();
+    updateSpeakerRecognitionUI();
   }
 
   function updateUI() {
@@ -33,6 +42,20 @@ module.exports = function() {
     // Show/hide appropriate UI elements
     d3.select("#row-caption").classed("hidden", isAuto);
     d3.select("#captions-editor").classed("hidden", !isAuto);
+    if (isAuto) {
+      updateSpeakerRecognitionUI();
+    }
+  }
+
+  function updateSpeakerRecognitionUI() {
+    var isAuto = captionMode === "auto";
+    var speakerEditor = d3.select("#speaker-names-editor");
+    
+    if (isAuto && speakerRecognitionEnabled) {
+      speakerEditor.classed("hidden", false);
+    } else {
+      speakerEditor.classed("hidden", true);
+    }
   }
 
   function setMode(mode) {
@@ -194,6 +217,10 @@ module.exports = function() {
   }
 
   function getUniqueSpeakers() {
+    if (!speakerRecognitionEnabled) {
+      return [];
+    }
+    
     var speakers = {};
     segments.forEach(function(seg) {
       if (seg.speaker) {
@@ -201,6 +228,10 @@ module.exports = function() {
       }
     });
     return Object.keys(speakers);
+  }
+
+  function isSpeakerRecognitionEnabled() {
+    return speakerRecognitionEnabled;
   }
 
   function renderSpeakerNamesEditor() {
@@ -246,7 +277,8 @@ module.exports = function() {
     clear: clear,
     getSpeakerNames: getSpeakerNames,
     setSpeakerName: setSpeakerName,
-    getUniqueSpeakers: getUniqueSpeakers
+    getUniqueSpeakers: getUniqueSpeakers,
+    isSpeakerRecognitionEnabled: isSpeakerRecognitionEnabled
   };
 
 };

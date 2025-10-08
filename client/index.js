@@ -107,6 +107,7 @@ function submitted() {
   } else {
     formData.append("timedCaptions", JSON.stringify(timedCaptions));
     formData.append("speakerNames", JSON.stringify(captionsEditor.getSpeakerNames()));
+    formData.append("speakerRecognitionEnabled", captionsEditor.isSpeakerRecognitionEnabled());
   }
 
   setClass("loading");
@@ -244,6 +245,7 @@ function transcribeAudio() {
   var formData = new FormData();
   formData.append("audio", file);
   formData.append("theme", JSON.stringify(preview.theme()));
+  formData.append("speakerRecognitionEnabled", captionsEditor.isSpeakerRecognitionEnabled());
 
   $.ajax({
     url: config.baseUrl + "/submit/",

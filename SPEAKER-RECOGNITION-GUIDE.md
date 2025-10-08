@@ -14,13 +14,20 @@ Speaker recognition (also called speaker diarization) automatically identifies d
 
 ## 🚀 How It Works
 
-### 1. Automatic Speaker Detection
+### 1. Optional Speaker Detection
 
-When you transcribe audio, AssemblyAI automatically:
-- Identifies different voices
+Speaker recognition is **optional** and can be toggled on/off:
+
+**When Enabled:**
+- AssemblyAI automatically identifies different voices
 - Assigns speaker labels (Speaker A, Speaker B, etc.)
 - Tracks which speaker says what
-- Provides word-level timestamps
+- Provides word-level timestamps with speaker information
+
+**When Disabled:**
+- Standard transcription without speaker identification
+- Perfect for single-speaker content
+- Faster processing and lower cost
 
 ### 2. Speaker Name Customization
 
@@ -43,18 +50,19 @@ In the final video:
 
 1. Select your audio file (MP3, WAV, etc.)
 2. Choose "Auto-Generate (Transcribe)" mode
-3. Click "Generate Captions"
+3. **Optional**: Toggle "Enable Speaker Recognition" on/off
+4. Click "Generate Captions"
 
 ### Step 2: Wait for Transcription
 
 AssemblyAI will:
 - Process your audio (10-30 seconds per minute)
-- Identify speakers automatically
-- Generate timed captions with speaker labels
+- **If speaker recognition enabled**: Identify speakers automatically
+- Generate timed captions (with speaker labels if enabled)
 
-### Step 3: Customize Speaker Names
+### Step 3: Customize Speaker Names (if enabled)
 
-After transcription, you'll see:
+**If speaker recognition is enabled**, after transcription you'll see:
 
 ```
 Speaker Names
@@ -70,11 +78,13 @@ Edit the names to match your speakers:
 - Type the actual name
 - Changes apply immediately
 
+**If speaker recognition is disabled**, this section won't appear.
+
 ### Step 4: Edit Captions
 
 Each caption segment shows:
 - **Timestamp**: 0:05 → 0:08
-- **Speaker**: Dropdown to change speaker
+- **Speaker**: Dropdown to change speaker (if speaker recognition enabled)
 - **Text**: Editable caption text
 - **Delete**: Remove unwanted segments
 
@@ -82,7 +92,7 @@ Each caption segment shows:
 
 Click "Generate" to create your video with:
 - Timed captions
-- Speaker names in colors
+- Speaker names in colors (if speaker recognition enabled)
 - Professional subtitle styling
 
 ## 🎨 Speaker Colors
@@ -115,16 +125,19 @@ Edit `settings/themes.json`:
 
 ## 💡 Tips for Best Results
 
+### When to Enable Speaker Recognition
+- ✅ **Multiple speakers** (interviews, podcasts, meetings)
+- ✅ **Clear speaker separation** (not overlapping)
+- ✅ **2-5 speakers** work best
+- ❌ **Single speaker** content (no benefit)
+- ❌ **Heavy background noise** (may confuse detection)
+- ❌ **Overlapping speech** (speakers talking simultaneously)
+
 ### Audio Quality
 - **Clear audio** = better speaker detection
 - **Minimize background noise**
 - **Separate speakers** (not overlapping)
 - **Good microphone quality**
-
-### Speaker Count
-- **2-5 speakers** work best
-- **More than 5** may be less accurate
-- **Single speaker** works but no benefit
 
 ### Speaker Changes
 - **Natural pauses** help detection
@@ -289,11 +302,24 @@ Speaker recognition is **included at no extra cost**:
 
 ```
 1. Upload podcast.mp3
-2. Click "Generate Captions"
-3. Wait 30 seconds
-4. Edit: "Speaker A" → "Host", "Speaker B" → "Guest"
-5. Click "Generate"
-6. Done! 🎉
+2. Enable "Speaker Recognition" (checkbox)
+3. Click "Generate Captions"
+4. Wait 30 seconds
+5. Edit: "Speaker A" → "Host", "Speaker B" → "Guest"
+6. Click "Generate"
+7. Done! 🎉
+```
+
+### Single Speaker Content
+
+```
+1. Upload speech.mp3
+2. Disable "Speaker Recognition" (uncheck)
+3. Click "Generate Captions"
+4. Wait 20 seconds
+5. Edit caption text if needed
+6. Click "Generate"
+7. Done! 🎉
 ```
 
 ### Complex Panel
@@ -311,20 +337,27 @@ Speaker recognition is **included at no extra cost**:
 
 ## 🎯 Use Cases
 
-### Perfect For:
+### Perfect For (Speaker Recognition Enabled):
 - ✅ Podcast interviews
-- ✅ Conference presentations
-- ✅ Educational content
+- ✅ Conference presentations with multiple speakers
 - ✅ Meeting recordings
 - ✅ Panel discussions
 - ✅ Q&A sessions
+- ✅ Multi-speaker educational content
+
+### Perfect For (Speaker Recognition Disabled):
+- ✅ Single speaker presentations
+- ✅ Monologues
+- ✅ Solo podcasts
+- ✅ Speeches
+- ✅ Narration
+- ✅ Music with vocals
 
 ### Not Ideal For:
-- ❌ Music with vocals
 - ❌ Very noisy environments
-- ❌ Single speaker content
 - ❌ Non-English audio
 - ❌ Heavily accented speech
+- ❌ Overlapping speech (when speaker recognition enabled)
 
 ## 📚 Related Documentation
 

@@ -186,8 +186,20 @@ input[type='text'] {
 #captions-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+#transcription-options {
+  flex-grow: 1;
+}
+
+#transcription-options .note {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  font-style: italic;
 }
 
 #captions-header h3 {
@@ -313,6 +325,24 @@ input[type='text'] {
   border: 1px solid #ddd;
   border-radius: 3px;
   min-width: 120px;
+}
+
+/* Checkbox styling */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 0;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.checkbox-label .checkmark {
+  margin-left: 4px;
 }
 
 /* Preview canvas */

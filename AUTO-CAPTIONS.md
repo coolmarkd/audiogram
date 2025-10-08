@@ -64,33 +64,38 @@ This is the default mode and works exactly as before:
 
 ### Caption Mode: Auto-Generate
 
-This mode enables automatic transcription with speaker recognition and timed captions:
+This mode enables automatic transcription with optional speaker recognition and timed captions:
 
-1. **Transcription**: Audio is transcribed using AssemblyAI with speaker diarization
-2. **Speaker Recognition**: Different speakers are automatically identified (Speaker A, Speaker B, etc.)
-3. **Segment Generation**: Text is broken into 2-3 second caption blocks per speaker
+1. **Transcription**: Audio is transcribed using AssemblyAI
+2. **Optional Speaker Recognition**: 
+   - **Enabled**: Different speakers are automatically identified (Speaker A, Speaker B, etc.)
+   - **Disabled**: Single speaker transcription (no speaker identification)
+3. **Segment Generation**: Text is broken into 2-3 second caption blocks
 4. **Manual Editing**: Edit each caption segment:
    - Modify text content
-   - Change speaker assignments
+   - Change speaker assignments (if speaker recognition enabled)
    - Customize speaker names (e.g., "Speaker A" → "Host", "Speaker B" → "Guest")
    - Delete unwanted segments
    - Timestamps are automatically assigned
-5. **Video Generation**: Captions appear/disappear at specified times with speaker names and colors
+5. **Video Generation**: Captions appear/disappear at specified times (with speaker names if enabled)
 
 ### Caption Editor Features
 
 When in Auto-Generate mode, you'll see:
 
-- **Speaker Names Editor**: Customize speaker names:
+- **Speaker Recognition Toggle**: 
+  - ☑️ **Enabled**: Identify different speakers (Host, Guest, etc.)
+  - ☐ **Disabled**: Single speaker transcription
+- **Speaker Names Editor** (when enabled): Customize speaker names:
   - Speaker A: [Host]
   - Speaker B: [Guest]
   - Speaker C: [Moderator]
 - **Caption Segments List**: Each segment shows:
   - Timestamp range (start → end)
-  - Speaker selector dropdown
+  - Speaker selector dropdown (if speaker recognition enabled)
   - Editable text field
   - Delete button
-- **Generate Captions Button**: Triggers transcription with speaker recognition
+- **Generate Captions Button**: Triggers transcription
 - **Real-time Editing**: Changes are saved automatically
 
 ## Theme Configuration
