@@ -176,16 +176,6 @@ module.exports = function() {
     var speakerCountInput = d3.select("#speaker-count-input");
     var speakerCountNote = d3.select("#speaker-count-note");
     
-    // Debug: Check if elements exist
-    if (speakerCountInput.empty()) {
-      console.warn("Speaker count input element not found");
-      return;
-    }
-    if (speakerCountNote.empty()) {
-      console.warn("Speaker count note element not found");
-      return;
-    }
-    
     if (speakerCountType === "auto") {
       speakerCountInput.classed("hidden", true);
     } else {
