@@ -340,6 +340,8 @@ function transcribeAudio() {
   formData.append("audio", file);
   formData.append("theme", JSON.stringify(preview.theme()));
   formData.append("speakerRecognitionEnabled", captionsEditor.isSpeakerRecognitionEnabled());
+  formData.append("speakerCountType", captionsEditor.getSpeakerCountType());
+  formData.append("speakerCountValue", captionsEditor.getSpeakerCountValue());
 
   $.ajax({
     url: config.baseUrl + "/submit/",

@@ -78,16 +78,40 @@ function redraw() {
 
   renderer.backgroundImage(theme.backgroundImageFile || null);
 
-  // Get current caption mode from captions editor
+  // Get current caption mode and data from captions editor
   var captionMode = window.captionsEditor ? window.captionsEditor.getMode() : "static";
+  var captionToShow = null;
+  var timedCaptions = null;
+  var speakerNames = null;
+  var speakerRecognitionEnabled = false;
+  var captionFormatting = null;
+  var waveformPositioning = null;
+  var waveformConfig = null;
   
-  // Only show static caption if not in auto mode
-  var captionToShow = (captionMode === "auto") ? null : caption;
+  if (captionMode === "auto" && window.captionsEditor) {
+    // In auto mode, get timed captions and related data
+    timedCaptions = window.captionsEditor.getSegments();
+    speakerNames = window.captionsEditor.getSpeakerNames();
+    speakerRecognitionEnabled = window.captionsEditor.isSpeakerRecognitionEnabled();
+    captionFormatting = window.captionsEditor.getCaptionFormatting();
+    waveformPositioning = window.captionsEditor.getWaveformPositioning();
+    waveformConfig = window.captionsEditor.getWaveformConfig();
+  } else {
+    // In static mode, show static caption
+    captionToShow = caption;
+  }
 
   renderer.drawFrame(context, {
     caption: captionToShow,
     waveform: sampleWave,
-    frame: 0
+    frame: 0,
+    currentTime: 0, // For timed captions, show the first frame
+    timedCaptions: timedCaptions,
+    speakerNames: speakerNames,
+    speakerRecognitionEnabled: speakerRecognitionEnabled,
+    captionFormatting: captionFormatting,
+    waveformPositioning: waveformPositioning,
+    waveformConfig: waveformConfig
   });
 
 }

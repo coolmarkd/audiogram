@@ -11,6 +11,8 @@ module.exports = function() {
       previewPlaying = false,
       speakerNames = {}, // Map of speaker labels to custom names
       speakerRecognitionEnabled = true, // Whether speaker recognition is enabled
+      speakerCountType = "auto", // "auto", "minimum", or "exact"
+      speakerCountValue = 2, // Number of speakers
       captionFormatting = {
         global: {
           x: 50,
@@ -64,6 +66,19 @@ module.exports = function() {
       if (onUpdate) onUpdate();
     });
 
+    // Set up speaker count type selector
+    d3.select("#speaker-count-type").on("change", function() {
+      speakerCountType = this.value;
+      updateSpeakerCountUI();
+      if (onUpdate) onUpdate();
+    });
+
+    // Set up speaker count value input
+    d3.select("#speaker-count-value").on("input", function() {
+      speakerCountValue = +this.value;
+      if (onUpdate) onUpdate();
+    });
+
     // Set up formatting tabs
     d3.selectAll(".formatting-tab").on("click", function() {
       var tab = d3.select(this).attr("data-tab");
@@ -79,6 +94,9 @@ module.exports = function() {
     // Set up waveform configuration controls
     setupWaveformConfigControls();
 
+    // Set up preview update triggers
+    setupPreviewUpdateTriggers();
+
     // Set up transcribe button
     d3.select("#transcribe-btn").on("click", function() {
       d3.event.preventDefault();
@@ -87,6 +105,7 @@ module.exports = function() {
 
     updateUI();
     updateSpeakerRecognitionUI();
+    updateSpeakerCountUI();
     
     // Initialize preview
     initPreview();
@@ -118,6 +137,7 @@ module.exports = function() {
     var speakerEditor = d3.select("#speaker-names-editor");
     var formattingEditor = d3.select("#caption-formatting-editor");
     var waveformEditor = d3.select("#waveform-positioning-editor");
+    var speakerCountOptions = d3.select("#speaker-count-options");
     
     if (isAuto) {
       formattingEditor.classed("hidden", false);
@@ -125,13 +145,33 @@ module.exports = function() {
       
       if (speakerRecognitionEnabled) {
         speakerEditor.classed("hidden", false);
+        speakerCountOptions.classed("hidden", false);
       } else {
         speakerEditor.classed("hidden", true);
+        speakerCountOptions.classed("hidden", true);
       }
     } else {
       speakerEditor.classed("hidden", true);
       formattingEditor.classed("hidden", true);
       waveformEditor.classed("hidden", true);
+      speakerCountOptions.classed("hidden", true);
+    }
+  }
+
+  function updateSpeakerCountUI() {
+    var speakerCountInput = d3.select("#speaker-count-input");
+    var speakerCountNote = d3.select("#speaker-count-note");
+    
+    if (speakerCountType === "auto") {
+      speakerCountInput.classed("hidden", true);
+    } else {
+      speakerCountInput.classed("hidden", false);
+      
+      if (speakerCountType === "minimum") {
+        speakerCountNote.text("Set the minimum number of speakers to detect");
+      } else if (speakerCountType === "exact") {
+        speakerCountNote.text("Set the exact number of speakers to detect");
+      }
     }
   }
 
@@ -169,6 +209,11 @@ module.exports = function() {
     var previewSection = document.getElementById('caption-preview-section');
     if (previewSection && segments.length > 0) {
       previewSection.classList.remove('hidden');
+    }
+    
+    // Update main canvas preview
+    if (window.preview && window.preview.redraw) {
+      window.preview.redraw();
     }
   }
 
@@ -317,6 +362,14 @@ module.exports = function() {
     return speakerRecognitionEnabled;
   }
 
+  function getSpeakerCountType() {
+    return speakerCountType;
+  }
+
+  function getSpeakerCountValue() {
+    return speakerCountValue;
+  }
+
   function switchFormattingTab(tab) {
     // Update tab buttons
     d3.selectAll(".formatting-tab").classed("active", false);
@@ -460,6 +513,23 @@ module.exports = function() {
       d3.select("#waveform-smoothing-value").text(this.value + "%");
       if (onUpdate) onUpdate();
     });
+  }
+
+  function setupPreviewUpdateTriggers() {
+    // Trigger main canvas preview redraw when any caption-related setting changes
+    var updateMainPreview = function() {
+      if (window.preview && window.preview.redraw) {
+        window.preview.redraw();
+      }
+    };
+
+    // Add update triggers to all relevant controls
+    d3.selectAll("#caption-formatting-editor input, #caption-formatting-editor select").on("input", updateMainPreview);
+    d3.selectAll("#waveform-positioning-editor input, #waveform-positioning-editor select").on("input", updateMainPreview);
+    d3.selectAll("#waveform-style input, #waveform-style select").on("input", updateMainPreview);
+    d3.select("#enable-speaker-recognition").on("change", updateMainPreview);
+    d3.select("#speaker-count-type").on("change", updateMainPreview);
+    d3.select("#speaker-count-value").on("input", updateMainPreview);
   }
 
   function switchWaveformTab(tab) {
@@ -746,7 +816,15 @@ module.exports = function() {
 
     if (currentSegment) {
       previewCaption.style.display = 'block';
-      previewCaption.textContent = currentSegment.text;
+      
+      // Build caption text with speaker name if enabled (matching renderer logic)
+      var captionText = currentSegment.text;
+      if (speakerRecognitionEnabled && currentSegment.speaker) {
+        var speakerName = speakerNames[currentSegment.speaker] || currentSegment.speaker;
+        captionText = speakerName + ": " + currentSegment.text;
+      }
+      
+      previewCaption.textContent = captionText;
       
       // Apply formatting
       var formatting = getCaptionFormatting();
@@ -794,6 +872,8 @@ module.exports = function() {
     setSpeakerName: setSpeakerName,
     getUniqueSpeakers: getUniqueSpeakers,
     isSpeakerRecognitionEnabled: isSpeakerRecognitionEnabled,
+    getSpeakerCountType: getSpeakerCountType,
+    getSpeakerCountValue: getSpeakerCountValue,
     getCaptionFormatting: getCaptionFormatting,
     getWaveformPositioning: getWaveformPositioning,
     getWaveformConfig: getWaveformConfig,

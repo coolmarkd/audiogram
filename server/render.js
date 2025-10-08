@@ -36,6 +36,10 @@ function validate(req, res, next) {
   // Handle speaker recognition flag
   req.body.speakerRecognitionEnabled = req.body.speakerRecognitionEnabled === "true" || req.body.speakerRecognitionEnabled === true;
 
+  // Handle speaker count settings
+  req.body.speakerCountType = req.body.speakerCountType || "auto";
+  req.body.speakerCountValue = req.body.speakerCountValue ? parseInt(req.body.speakerCountValue) : 2;
+
   // Parse timed captions if provided
   if (req.body.timedCaptions) {
     try {

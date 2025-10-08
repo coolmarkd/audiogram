@@ -60,6 +60,21 @@
                 Enable Speaker Recognition
               </label>
               <div class="note">Identify different speakers (Host, Guest, etc.)</div>
+              
+              <div id="speaker-count-options" class="speaker-count-section">
+                <label for="speaker-count-type">Speaker Count Setting:</label>
+                <select id="speaker-count-type">
+                  <option value="auto">Auto-detect</option>
+                  <option value="minimum">Minimum speakers</option>
+                  <option value="exact">Exact speakers</option>
+                </select>
+                
+                <div id="speaker-count-input" class="speaker-count-input hidden">
+                  <label for="speaker-count-value">Number of speakers:</label>
+                  <input type="number" id="speaker-count-value" min="1" max="10" value="2">
+                  <div class="note" id="speaker-count-note">Set the minimum number of speakers to detect</div>
+                </div>
+              </div>
             </div>
             <button id="transcribe-btn" class="button">Generate Captions</button>
           </div>
