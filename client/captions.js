@@ -138,10 +138,10 @@ module.exports = function() {
       }
     }
     
-    if (isAuto) {
+    //if (isAuto) {
       updateSpeakerRecognitionUI();
       updateSpeakerCountUI(); // Also update speaker count UI
-    }
+    //}
   }
 
   function updateSpeakerRecognitionUI() {
