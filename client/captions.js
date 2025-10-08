@@ -53,6 +53,17 @@ module.exports = function() {
     updateSpeakerCountUI();
     if (onUpdate) onUpdate();
   }
+  
+  // Debug function to check current select value
+  function debugSpeakerCountSelect() {
+    var selectElement = document.getElementById("speaker-count-type");
+    if (selectElement) {
+      console.log("Current select value:", selectElement.value);
+      console.log("Current speakerCountType variable:", speakerCountType);
+    } else {
+      console.warn("Select element not found for debugging");
+    }
+  }
 
   function init(updateCallback) {
     console.log("captions.js init function called");
@@ -153,6 +164,14 @@ module.exports = function() {
     updateSpeakerRecognitionUI();
     updateSpeakerCountUI();
     
+    // Debug: Check initial state
+    setTimeout(function() {
+      debugSpeakerCountSelect();
+    }, 500);
+    
+    // Make debug function globally accessible
+    window.debugSpeakerCountSelect = debugSpeakerCountSelect;
+    
     // Initialize preview
     initPreview();
   }
@@ -238,19 +257,34 @@ module.exports = function() {
   function updateSpeakerCountUI() {
     var speakerCountInput = d3.select("#speaker-count-input");
     var speakerCountNote = d3.select("#speaker-count-note");
-    console.log("speakerCountType: " + speakerCountType);
+    console.log("updateSpeakerCountUI called - speakerCountType: " + speakerCountType);
     console.log("speakerCountValue: " + speakerCountValue);
-    console.log("speakerCountNote: " + speakerCountNote);
+    console.log("speakerCountInput element found:", !speakerCountInput.empty());
+    console.log("speakerCountNote element found:", !speakerCountNote.empty());
+    
     if (speakerCountType === "auto") {
+      console.log("Setting speaker count input to hidden (auto mode)");
       speakerCountInput.classed("hidden", true);
     } else {
+      console.log("Setting speaker count input to visible (non-auto mode)");
       speakerCountInput.classed("hidden", false);
       
       if (speakerCountType === "minimum") {
         speakerCountNote.text("Set the minimum number of speakers to detect");
+        console.log("Set note for minimum speakers");
       } else if (speakerCountType === "exact") {
         speakerCountNote.text("Set the exact number of speakers to detect");
+        console.log("Set note for exact speakers");
       }
+    }
+    
+    // Debug: Check if element is actually visible
+    var nativeElement = document.getElementById("speaker-count-input");
+    if (nativeElement) {
+      console.log("Native element found, has hidden class:", nativeElement.classList.contains("hidden"));
+      console.log("Element computed style display:", window.getComputedStyle(nativeElement).display);
+    } else {
+      console.warn("Native element not found");
     }
   }
 
