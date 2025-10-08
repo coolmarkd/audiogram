@@ -1,3 +1,7 @@
+.hidden {
+  display: none !important;
+}
+
 div.container {
   width: 640px;
   margin-bottom: 2rem;
