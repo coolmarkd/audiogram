@@ -710,6 +710,12 @@ g.time line {
   }
 }
 
+/* Font loading optimization */
+@font-face {
+  font-family: 'FontAwesome';
+  font-display: swap;
+}
+
 /* Caption preview styles */
 #caption-preview-section {
   margin-top: 20px;

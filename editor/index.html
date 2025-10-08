@@ -4,8 +4,9 @@
     <title>Audiogram</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300,600" rel="stylesheet" type="text/css">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300,600&display=swap" rel="stylesheet" type="text/css">
     <link href="/css/base.css" rel="stylesheet" type="text/css">
     <link href="/css/editor.css" rel="stylesheet" type="text/css">
     <link href="/fonts/fonts.css" rel="stylesheet" type="text/css">
@@ -265,9 +266,9 @@
             <div id="controls">
               <span id="tip">Click and drag over the waveform to clip audio<br />Use space bar to play/pause</span>
               <span id="duration"><strong></strong> seconds selected</span>
-              <button id="play"><i class="fa fa-play"></i>Play</button>
-              <button id="pause" class="hidden"><i class="fa fa-pause"></i>Pause</button>
-              <button id="restart"><i class="fa fa-step-backward"></i>Restart</button>
+              <button id="play"><i class="fas fa-play"></i>Play</button>
+              <button id="pause" class="hidden"><i class="fas fa-pause"></i>Pause</button>
+              <button id="restart"><i class="fas fa-step-backward"></i>Restart</button>
             </div>
           </div>
         </div>
@@ -282,10 +283,10 @@
           </video>
         </div>
         <div class="row" id="row-submit">
-          <button type="button" id="return" class="left"><i class="fa fa-edit"></i>Return to editor</button>
-          <button type="button" id="submit" class="right hidden"><i class="fa fa-cloud-upload"></i>Generate</button>
-          <button type="button" id="regenerate" class="right hidden"><i class="fa fa-refresh"></i>Regenerate Video</button>
-          <a id="download" class="button right" href="#" target="_blank"><i class="fa fa-download"></i>Download</a>
+          <button type="button" id="return" class="left"><i class="fas fa-edit"></i>Return to editor</button>
+          <button type="button" id="submit" class="right hidden"><i class="fas fa-cloud-upload"></i>Generate</button>
+          <button type="button" id="regenerate" class="right hidden"><i class="fas fa-refresh"></i>Regenerate Video</button>
+          <a id="download" class="button right" href="#" target="_blank"><i class="fas fa-download"></i>Download</a>
           <div class="clear"></div>
         </div>
       </div><!-- #loaded -->
