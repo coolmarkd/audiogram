@@ -29,14 +29,20 @@ RUN echo "Always Git!" &&  date && git clone -b feature/autocaption https://gith
 # Get git commit hash from the cloned repository
 RUN cd /tmp/audiogram && git rev-parse HEAD > /tmp/git_commit_hash.txt
 
-# Non-privileged user
+# Create user and set up working directory
 RUN useradd -m audiogram
+RUN mkdir -p /home/audiogram/audiogram
+RUN chown -R audiogram:audiogram /home/audiogram
+
+# Copy files to working directory (as root)
+RUN cp -r /tmp/audiogram/* /home/audiogram/audiogram/
+
+# Clean up temporary directory (as root)
+RUN rm -rf /tmp/audiogram
+
+# Switch to non-privileged user
 USER audiogram
 WORKDIR /home/audiogram/audiogram
-
-# Copy files to working directory
-RUN cp -r /tmp/audiogram/* ./
-RUN rm -rf /tmp/audiogram
 
 # Set git commit hash as build argument
 ARG GIT_COMMIT_HASH
