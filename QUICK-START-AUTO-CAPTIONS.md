@@ -6,14 +6,23 @@
 # 1. Install dependencies
 npm install
 
-# 2. Start the server
+# 2. Set up API key
+cp env.example .env
+# Edit .env and add your ASSEMBLYAI_API_KEY
+
+# 3. Start the server
 npm start
 
-# 3. Open browser
+# 4. Open browser
 # Navigate to http://localhost:8888
 ```
 
-The Whisper model (~150MB) will download automatically on first use.
+**Get an AssemblyAI API key:** https://www.assemblyai.com/  
+**Cost:** ~$0.015 per minute of audio (very affordable!)  
+**Free credits:** $50 free to start!
+
+**Docker?** See `DOCKER-API-KEY-GUIDE.md` for secure container setup.  
+**No API key?** See `WHISPER-ALTERNATIVES.md` for free local options.
 
 ## Usage
 

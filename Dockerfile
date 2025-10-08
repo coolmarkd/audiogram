@@ -49,6 +49,9 @@ RUN npm install --audit-level=moderate --fund=false
 # Set the PORT environment variable
 ENV PORT=8888
 
+# API key will be provided at runtime via -e flag
+# DO NOT set ASSEMBLYAI_API_KEY here - pass it at runtime!
+
 # Expose the port the app runs on
 EXPOSE 8888
 

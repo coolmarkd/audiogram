@@ -19,11 +19,29 @@ First, install the required npm packages:
 npm install
 ```
 
-This will install `whisper-node` along with other dependencies.
+This will install the `openai` package along with other dependencies.
 
-### 2. Whisper Model Download
+### 2. Set up AssemblyAI API Key
 
-The first time you use the transcription feature, Whisper will automatically download the `base.en` model (~150MB). This only happens once.
+The transcription feature uses AssemblyAI's API. You'll need an API key:
+
+1. Get an API key from [AssemblyAI](https://www.assemblyai.com/)
+   - Sign up for free account
+   - Get $50 in free credits
+2. Copy `env.example` to `.env`:
+   ```bash
+   cp env.example .env
+   ```
+3. Edit `.env` and add your API key:
+   ```
+   ASSEMBLYAI_API_KEY=your-actual-api-key-here
+   ```
+
+**Cost:** Approximately $0.00025 per second (~$0.015 per minute, ~$0.90 per hour).
+
+**Note:** Much cheaper than OpenAI! Plus you get $50 in free credits to start.
+
+**Docker Users:** See `DOCKER-API-KEY-GUIDE.md` for secure API key handling in containers.
 
 ## Usage
 
@@ -100,7 +118,7 @@ Timed captions use different styling from static captions. Configure in `setting
 
 1. Audio file is uploaded to server
 2. Server calls `/transcribe/:id` endpoint
-3. Whisper processes audio and returns segments:
+3. AssemblyAI API processes audio and returns word-level timestamps:
    ```json
    {
      "segments": [
@@ -139,38 +157,40 @@ During frame generation:
 
 ### Transcription Speed
 
-- Depends on audio length and system resources
+- Depends on audio length and AssemblyAI API response time
 - Typical: 10-30 seconds for 1 minute of audio
-- Uses local processing (no external API calls)
+- Uses AssemblyAI's API (requires API key)
+- Word-level timestamps for precise caption timing
 
-### Model Size
+### Cost
 
-- `base.en` model: ~150MB download (one-time)
-- Stored in `~/.cache/whisper/`
-- Good balance of speed and accuracy
+- AssemblyAI API: ~$0.015 per minute of audio
+- Example: 10-minute podcast = ~$0.15
+- Example: 1-hour interview = ~$0.90
+- **Free credits:** $50 free when you sign up!
 
-### Alternative Models
+### Alternative Options
 
-Edit `lib/transcribe.js` to use different models:
-
-```javascript
-modelName: "tiny.en",    // Faster, less accurate (~75MB)
-modelName: "small.en",   // Slower, more accurate (~500MB)
-modelName: "medium.en",  // Much slower, very accurate (~1.5GB)
-```
+**Want different options?** See `WHISPER-ALTERNATIVES.md` for:
+- Free local Whisper processing (no API required)
+- OpenAI Whisper (more expensive: $0.36/hour)
+- Deepgram (fastest, $0.0043/min)
+- Other transcription services
 
 ## Troubleshooting
 
-### Whisper Installation Issues
+### API Key Issues
 
 If transcription fails:
 
-1. **Check Node.js version**: Requires Node.js 18+
-2. **Install whisper-node manually**:
+1. **Check API key**: Make sure `ASSEMBLYAI_API_KEY` is set in `.env`
+2. **Verify API key**: Test at https://www.assemblyai.com/dashboard
+3. **Check balance**: Ensure your AssemblyAI account has credits
+4. **Install assemblyai package**:
    ```bash
-   npm install whisper-node
+   npm install assemblyai
    ```
-3. **Check system dependencies**: Whisper requires ffmpeg
+5. **Docker users**: See `DOCKER-API-KEY-GUIDE.md` for proper configuration
 
 ### Transcription Errors
 
