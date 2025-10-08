@@ -75,22 +75,14 @@ module.exports = function() {
       if (onUpdate) onUpdate();
     });
 
-    // Set up speaker count type selector - use event delegation to handle hidden elements
-    d3.select(document).on("change", "#speaker-count-type", function() {
-      console.log("Speaker count type changed to: " + this.value);
-      speakerCountType = this.value;
-      updateSpeakerCountUI();
-      if (onUpdate) onUpdate();
-    });
-    
-    // Also try direct attachment as backup
+    // Set up speaker count type selector
     var speakerCountTypeSelect = d3.select("#speaker-count-type");
     if (speakerCountTypeSelect.empty()) {
       console.warn("Speaker count type select element not found");
     } else {
-      console.log("Speaker count type select element found, attaching direct event listener");
+      console.log("Speaker count type select element found, attaching event listener");
       speakerCountTypeSelect.on("change", function() {
-        console.log("Speaker count type changed to (direct): " + this.value);
+        console.log("Speaker count type changed to: " + this.value);
         speakerCountType = this.value;
         updateSpeakerCountUI();
         if (onUpdate) onUpdate();
@@ -186,17 +178,7 @@ module.exports = function() {
       keytermsSection.classed("hidden", false);
       speakerCountOptions.classed("hidden", false); // Always show speaker count options in auto mode
       
-      // Re-attach event listener when element becomes visible
-      var speakerCountTypeSelect = d3.select("#speaker-count-type");
-      if (!speakerCountTypeSelect.empty()) {
-        console.log("Re-attaching speaker count type event listener (element now visible)");
-        speakerCountTypeSelect.on("change", function() {
-          console.log("Speaker count type changed to (re-attached): " + this.value);
-          speakerCountType = this.value;
-          updateSpeakerCountUI();
-          if (onUpdate) onUpdate();
-        });
-      }
+      // Event listener is already attached during init, no need to re-attach
       
       if (speakerRecognitionEnabled) {
         speakerEditor.classed("hidden", false);
