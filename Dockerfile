@@ -34,6 +34,15 @@ RUN echo "Always Git!" &&  date && git clone -b feature/autocaption https://gith
 RUN cp -r /tmp/audiogram/* ./
 RUN rm -rf /tmp/audiogram
 
+# Get git commit hash and set as build argument
+RUN git rev-parse HEAD > /tmp/git_commit_hash.txt
+ARG GIT_COMMIT_HASH
+RUN if [ -z "$GIT_COMMIT_HASH" ]; then \
+      GIT_COMMIT_HASH=$(cat /tmp/git_commit_hash.txt); \
+    fi && \
+    echo "Git commit hash: $GIT_COMMIT_HASH" && \
+    echo "GIT_COMMIT_HASH=$GIT_COMMIT_HASH" > /home/audiogram/audiogram/.env.git
+
 
 # Set environment variables for canvas compilation
 ENV PYTHON=/usr/bin/python3
@@ -48,6 +57,9 @@ RUN npm install --audit-level=moderate --fund=false
 
 # Set the PORT environment variable
 ENV PORT=8888
+
+# Set git commit hash as environment variable
+ENV GIT_COMMIT_HASH=${GIT_COMMIT_HASH}
 
 # API key will be provided at runtime via -e flag
 # DO NOT set ASSEMBLYAI_API_KEY here - pass it at runtime!

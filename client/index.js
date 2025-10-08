@@ -10,6 +10,20 @@ var config = {
   baseUrl: window.location.origin
 };
 
+// Display git commit hash if available (for debugging)
+console.log("Audiogram application starting...");
+console.log("Base URL:", config.baseUrl);
+
+// Fetch and display git commit hash
+d3.json("/git-info", function(err, gitInfo) {
+  if (!err && gitInfo) {
+    console.log("Git commit hash:", gitInfo.gitCommitHash);
+    console.log("Build timestamp:", gitInfo.timestamp);
+  } else {
+    console.log("Git commit hash: Not available");
+  }
+});
+
 // Load configuration from server
 d3.json("/config.json", function(err, serverConfig) {
   if (!err && serverConfig) {

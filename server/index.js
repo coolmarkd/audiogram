@@ -22,6 +22,14 @@ var app = express();
 app.use(compression());
 app.use(logger.morgan());
 
+// Serve git commit hash for debugging
+app.get("/git-info", function(req, res) {
+  res.json({
+    gitCommitHash: process.env.GIT_COMMIT_HASH || "Not available",
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Options for where to store uploaded audio and max size
 var fileOptions = {
   storage: multer.diskStorage({
