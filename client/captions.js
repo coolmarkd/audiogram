@@ -140,6 +140,7 @@ module.exports = function() {
     
     if (isAuto) {
       updateSpeakerRecognitionUI();
+      updateSpeakerCountUI(); // Also update speaker count UI
     }
   }
 
@@ -155,13 +156,12 @@ module.exports = function() {
       formattingEditor.classed("hidden", false);
       waveformEditor.classed("hidden", false);
       keytermsSection.classed("hidden", false);
+      speakerCountOptions.classed("hidden", false); // Always show speaker count options in auto mode
       
       if (speakerRecognitionEnabled) {
         speakerEditor.classed("hidden", false);
-        speakerCountOptions.classed("hidden", false);
       } else {
         speakerEditor.classed("hidden", true);
-        speakerCountOptions.classed("hidden", true);
       }
     } else {
       speakerEditor.classed("hidden", true);
@@ -170,6 +170,9 @@ module.exports = function() {
       speakerCountOptions.classed("hidden", true);
       keytermsSection.classed("hidden", true);
     }
+    
+    // Always update speaker count UI after speaker recognition UI changes
+    updateSpeakerCountUI();
   }
 
   function updateSpeakerCountUI() {
