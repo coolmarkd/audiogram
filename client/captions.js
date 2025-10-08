@@ -18,7 +18,9 @@ module.exports = function() {
           fontSize: 42,
           color: "#ffffff",
           backgroundColor: "#000000",
-          backgroundOpacity: 70
+          backgroundOpacity: 70,
+          strokeColor: "#000000",
+          strokeWidth: 2
         },
         speakers: {}
       },
@@ -343,6 +345,17 @@ module.exports = function() {
     d3.select("#caption-bg-opacity").on("input", function() {
       captionFormatting.global.backgroundOpacity = +this.value;
       d3.select("#caption-bg-opacity-value").text(this.value + "%");
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#caption-stroke-color").on("change", function() {
+      captionFormatting.global.strokeColor = this.value;
+      if (onUpdate) onUpdate();
+    });
+
+    d3.select("#caption-stroke-width").on("input", function() {
+      captionFormatting.global.strokeWidth = +this.value;
+      d3.select("#caption-stroke-width-value").text(this.value + "px");
       if (onUpdate) onUpdate();
     });
   }
@@ -734,6 +747,15 @@ module.exports = function() {
       previewCaption.style.color = finalFormatting.color;
       previewCaption.style.backgroundColor = finalFormatting.backgroundColor;
       previewCaption.style.opacity = (finalFormatting.backgroundOpacity / 100);
+      
+      // Apply stroke if enabled
+      if (finalFormatting.strokeWidth > 0) {
+        previewCaption.style.webkitTextStroke = finalFormatting.strokeWidth + 'px ' + finalFormatting.strokeColor;
+        previewCaption.style.textStroke = finalFormatting.strokeWidth + 'px ' + finalFormatting.strokeColor;
+      } else {
+        previewCaption.style.webkitTextStroke = 'none';
+        previewCaption.style.textStroke = 'none';
+      }
     } else {
       previewCaption.style.display = 'none';
     }

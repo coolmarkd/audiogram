@@ -32,6 +32,9 @@ function validate(req, res, next) {
 
   // Handle caption mode
   req.body.captionMode = req.body.captionMode || "static";
+  
+  // Handle speaker recognition flag
+  req.body.speakerRecognitionEnabled = req.body.speakerRecognitionEnabled === "true" || req.body.speakerRecognitionEnabled === true;
 
   // Parse timed captions if provided
   if (req.body.timedCaptions) {

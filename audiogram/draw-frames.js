@@ -33,6 +33,7 @@ function drawFrames(renderer, options, cb) {
       currentTime: currentTime,
       timedCaptions: options.timedCaptions,
       speakerNames: options.speakerNames,
+      speakerRecognitionEnabled: options.speakerRecognitionEnabled,
       captionFormatting: options.captionFormatting,
       waveformPositioning: options.waveformPositioning,
       waveformConfig: options.waveformConfig

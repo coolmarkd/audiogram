@@ -81,11 +81,13 @@ module.exports = function(t) {
         return seg.start <= options.currentTime && options.currentTime < seg.end;
       });
       if (segment) {
-        // Include speaker name if available and speaker recognition is enabled
-        if (segment.speaker && options.speakerNames && options.speakerNames[segment.speaker]) {
-          captionText = options.speakerNames[segment.speaker] + ": " + segment.text;
-        } else if (segment.speaker) {
-          captionText = segment.speaker + ": " + segment.text;
+        // Include speaker name only if speaker recognition is enabled
+        if (options.speakerRecognitionEnabled && segment.speaker) {
+          if (options.speakerNames && options.speakerNames[segment.speaker]) {
+            captionText = options.speakerNames[segment.speaker] + ": " + segment.text;
+          } else {
+            captionText = segment.speaker + ": " + segment.text;
+          }
         } else {
           captionText = segment.text;
         }
@@ -408,14 +410,16 @@ module.exports = function(t) {
     var textWidth = textMetrics.width;
     var textHeight = fontSize;
     
-    // Draw background rectangle
-    context.fillStyle = bgColorWithOpacity;
-    context.fillRect(
-      x - textWidth / 2 - padding,
-      y - textHeight / 2 - padding,
-      textWidth + padding * 2,
-      textHeight + padding * 2
-    );
+    // Draw background rectangle only if opacity > 0
+    if (bgOpacity > 0) {
+      context.fillStyle = bgColorWithOpacity;
+      context.fillRect(
+        x - textWidth / 2 - padding,
+        y - textHeight / 2 - padding,
+        textWidth + padding * 2,
+        textHeight + padding * 2
+      );
+    }
     
     // Draw speaker name with color if available
     if (speakerColor && text.indexOf(": ") > 0) {
@@ -431,18 +435,54 @@ module.exports = function(t) {
         context.textBaseline = "middle";
         
         var speakerY = y - fontSize - 5; // Position above main text
+        
+        // Draw speaker name stroke if enabled
+        var strokeWidth = currentFormatting.strokeWidth || 0;
+        var strokeColor = currentFormatting.strokeColor || "#000000";
+        if (strokeWidth > 0) {
+          context.strokeStyle = strokeColor;
+          context.lineWidth = strokeWidth * 2; // Canvas stroke is centered, so double for full width
+          context.strokeText(speakerName + ":", x, speakerY);
+        }
+        
         context.fillText(speakerName + ":", x, speakerY);
         
         // Draw main text in normal color
         context.fillStyle = currentFormatting.color || theme.subtitleColor || "#fff";
+        
+        // Draw main text stroke if enabled
+        if (strokeWidth > 0) {
+          context.strokeStyle = strokeColor;
+          context.lineWidth = strokeWidth * 2;
+          context.strokeText(speakerText, x, y);
+        }
+        
         context.fillText(speakerText, x, y);
       } else {
         context.fillStyle = currentFormatting.color || theme.subtitleColor || "#fff";
+        
+        // Draw stroke if enabled
+        if (strokeWidth > 0) {
+          context.strokeStyle = strokeColor;
+          context.lineWidth = strokeWidth * 2;
+          context.strokeText(displayText, x, y);
+        }
+        
         context.fillText(displayText, x, y);
       }
     } else {
       // Draw the subtitle text normally
       context.fillStyle = currentFormatting.color || theme.subtitleColor || "#fff";
+      
+      // Draw stroke if enabled
+      var strokeWidth = currentFormatting.strokeWidth || 0;
+      var strokeColor = currentFormatting.strokeColor || "#000000";
+      if (strokeWidth > 0) {
+        context.strokeStyle = strokeColor;
+        context.lineWidth = strokeWidth * 2;
+        context.strokeText(displayText, x, y);
+      }
+      
       context.fillText(displayText, x, y);
     }
     

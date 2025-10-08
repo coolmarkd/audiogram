@@ -118,6 +118,7 @@ Audiogram.prototype.drawFrames = function(cb) {
       caption: self.settings.caption,
       timedCaptions: self.settings.timedCaptions,
       speakerNames: self.settings.speakerNames,
+      speakerRecognitionEnabled: self.settings.speakerRecognitionEnabled,
       captionFormatting: self.settings.captionFormatting,
       waveformPositioning: self.settings.waveformPositioning,
       waveformConfig: self.settings.waveformConfig,
