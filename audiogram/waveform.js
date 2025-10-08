@@ -7,9 +7,35 @@ function getWaveform(filename, options, cb) {
   var stream = pcmStream(filename, {
         channels: options.channels
       }),
-      samples = [];
+      samples = [],
+      maxSamples = 5000000, // 5 million samples limit (~3 minutes at 44.1kHz)
+      sampleSkip = 1, // Start with no skipping
+      sampleCount = 0;
+
+  // For very long files, we need to downsample to avoid memory issues
+  // Calculate if we need to skip samples based on estimated duration
+  var estimatedSamples = options.numFrames * options.samplesPerFrame * 100; // Rough estimate
+  if (estimatedSamples > maxSamples) {
+    sampleSkip = Math.ceil(estimatedSamples / maxSamples);
+    console.log("Long audio file detected. Downsampling by factor of", sampleSkip, "to prevent memory issues.");
+  }
 
   stream.on("data",function(sample, channel){
+
+    // Skip samples for downsampling
+    if (sampleCount % sampleSkip !== 0) {
+      sampleCount++;
+      return;
+    }
+
+    // Check memory limit to prevent crashes on very long files
+    if (samples.length >= maxSamples) {
+      console.warn("Audio file too long for full waveform analysis. Using downsampled version.");
+      stream.destroy();
+      // Process what we have so far
+      var processed = processSamples(samples, options.numFrames, options.samplesPerFrame);
+      return cb(null, processed);
+    }
 
     // Average multiple channels
     if (channel > 0) {
@@ -17,6 +43,8 @@ function getWaveform(filename, options, cb) {
     } else {
       samples.push(sample);
     }
+
+    sampleCount++;
 
   });
 

@@ -50,6 +50,12 @@ Audiogram.prototype.getWaveform = function(cb) {
 
     self.profiler.size(data.duration);
     self.set("numFrames", self.numFrames = Math.floor(data.duration * self.settings.theme.framesPerSecond));
+    
+    // Warn about potential memory issues with very long files
+    if (data.duration > 1800) { // 30 minutes
+      console.warn("Very long audio file detected (" + Math.round(data.duration/60) + " minutes). Waveform processing may take longer and use more memory.");
+    }
+    
     self.status("waveform");
 
     getWaveform(self.audioPath, {
