@@ -46,6 +46,14 @@ module.exports = function() {
         smoothing: 0
       };
 
+  // Define the speaker count change handler function
+  function handleSpeakerCountChange() {
+    console.log("Speaker count type changed to (native handler): " + this.value);
+    speakerCountType = this.value;
+    updateSpeakerCountUI();
+    if (onUpdate) onUpdate();
+  }
+
   function init(updateCallback) {
     console.log("captions.js init function called");
     onUpdate = updateCallback;
@@ -87,6 +95,13 @@ module.exports = function() {
         updateSpeakerCountUI();
         if (onUpdate) onUpdate();
       });
+      
+      // Also try native JavaScript event listener as backup
+      var nativeElement = document.getElementById("speaker-count-type");
+      if (nativeElement) {
+        console.log("Also attaching native JavaScript event listener");
+        nativeElement.addEventListener("change", handleSpeakerCountChange);
+      }
     }
 
     // Set up speaker count value input
@@ -178,7 +193,30 @@ module.exports = function() {
       keytermsSection.classed("hidden", false);
       speakerCountOptions.classed("hidden", false); // Always show speaker count options in auto mode
       
-      // Event listener is already attached during init, no need to re-attach
+      // Re-attach event listener when element becomes visible (since it was hidden during init)
+      var speakerCountTypeSelect = d3.select("#speaker-count-type");
+      if (!speakerCountTypeSelect.empty()) {
+        console.log("Re-attaching speaker count type event listener (element now visible)");
+        // Remove any existing listeners first to avoid duplicates
+        speakerCountTypeSelect.on("change", null);
+        // Attach the new listener
+        speakerCountTypeSelect.on("change", function() {
+          console.log("Speaker count type changed to (re-attached): " + this.value);
+          speakerCountType = this.value;
+          updateSpeakerCountUI();
+          if (onUpdate) onUpdate();
+        });
+      }
+      
+      // Also re-attach native JavaScript event listener
+      var nativeElement = document.getElementById("speaker-count-type");
+      if (nativeElement) {
+        console.log("Re-attaching native JavaScript event listener (element now visible)");
+        // Remove existing listener
+        nativeElement.removeEventListener("change", handleSpeakerCountChange);
+        // Add new listener
+        nativeElement.addEventListener("change", handleSpeakerCountChange);
+      }
       
       if (speakerRecognitionEnabled) {
         speakerEditor.classed("hidden", false);
