@@ -74,14 +74,22 @@ module.exports = function() {
       if (onUpdate) onUpdate();
     });
 
-    // Set up speaker count type selector
+    // Set up speaker count type selector - use event delegation to handle hidden elements
+    d3.select(document).on("change", "#speaker-count-type", function() {
+      console.log("Speaker count type changed to: " + this.value);
+      speakerCountType = this.value;
+      updateSpeakerCountUI();
+      if (onUpdate) onUpdate();
+    });
+    
+    // Also try direct attachment as backup
     var speakerCountTypeSelect = d3.select("#speaker-count-type");
     if (speakerCountTypeSelect.empty()) {
       console.warn("Speaker count type select element not found");
     } else {
-      console.log("Speaker count type select element found, attaching event listener");
+      console.log("Speaker count type select element found, attaching direct event listener");
       speakerCountTypeSelect.on("change", function() {
-        console.log("Speaker count type changed to: " + this.value);
+        console.log("Speaker count type changed to (direct): " + this.value);
         speakerCountType = this.value;
         updateSpeakerCountUI();
         if (onUpdate) onUpdate();
@@ -93,6 +101,18 @@ module.exports = function() {
       speakerCountValue = +this.value;
       if (onUpdate) onUpdate();
     });
+    
+    // Debug: Test if we can access the element
+    setTimeout(function() {
+      var testElement = document.getElementById("speaker-count-type");
+      if (testElement) {
+        console.log("Element found via getElementById:", testElement);
+        console.log("Element value:", testElement.value);
+        console.log("Element visible:", testElement.offsetParent !== null);
+      } else {
+        console.warn("Element not found via getElementById");
+      }
+    }, 1000);
 
     // Set up keyterms controls
     setupKeytermsControls();
@@ -164,6 +184,18 @@ module.exports = function() {
       waveformEditor.classed("hidden", false);
       keytermsSection.classed("hidden", false);
       speakerCountOptions.classed("hidden", false); // Always show speaker count options in auto mode
+      
+      // Re-attach event listener when element becomes visible
+      var speakerCountTypeSelect = d3.select("#speaker-count-type");
+      if (!speakerCountTypeSelect.empty()) {
+        console.log("Re-attaching speaker count type event listener (element now visible)");
+        speakerCountTypeSelect.on("change", function() {
+          console.log("Speaker count type changed to (re-attached): " + this.value);
+          speakerCountType = this.value;
+          updateSpeakerCountUI();
+          if (onUpdate) onUpdate();
+        });
+      }
       
       if (speakerRecognitionEnabled) {
         speakerEditor.classed("hidden", false);
