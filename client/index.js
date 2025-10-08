@@ -26,7 +26,9 @@ d3.json("/config.json", function(err, serverConfig) {
 });
 
 function loadThemes() {
+  console.log("loadThemes called with baseUrl:", config.baseUrl);
   d3.json(config.baseUrl + "/settings/themes.json", function(err, themes){
+    console.log("Themes loaded:", err, themes);
 
     var errorMessage;
 
@@ -184,6 +186,7 @@ function error(msg) {
 
 // Once images are downloaded, set up listeners
 function initialize(err, themesWithImages) {
+  console.log("initialize function called with:", err, themesWithImages);
 
   // Populate dropdown menu
   d3.select("#input-theme")
@@ -236,11 +239,14 @@ function initialize(err, themesWithImages) {
   });
 
   // Initialize captions editor
+  console.log("About to initialize captions editor");
   captionsEditor.init(function(action) {
+    console.log("Captions editor callback called with action:", action);
     if (action === "transcribe") {
       transcribeAudio();
     }
   });
+  console.log("Captions editor init called");
   
   // Make captionsEditor and preview globally accessible
   window.captionsEditor = captionsEditor;

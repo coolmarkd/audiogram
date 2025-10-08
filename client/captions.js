@@ -47,6 +47,7 @@ module.exports = function() {
       };
 
   function init(updateCallback) {
+    console.log("captions.js init function called");
     onUpdate = updateCallback;
     
     // Set up event listeners for caption mode toggle
