@@ -72,38 +72,39 @@ module.exports = function(t) {
     }
 
     // Write the caption (static or timed)
-    var captionText = null;
-    var useSubtitleStyle = false;
-    
-    // If timed captions are provided, find the one for this frame
     if (options.timedCaptions && options.currentTime !== undefined) {
-      var segment = options.timedCaptions.find(function(seg) {
+      // Find ALL active segments for this time (support multiple speakers)
+      var activeSegments = options.timedCaptions.filter(function(seg) {
         return seg.start <= options.currentTime && options.currentTime < seg.end;
       });
-      if (segment) {
-        // Include speaker name only if speaker recognition is enabled
-        if (options.speakerRecognitionEnabled && segment.speaker) {
-          if (options.speakerNames && options.speakerNames[segment.speaker]) {
-            captionText = options.speakerNames[segment.speaker] + ": " + segment.text;
+      
+      if (activeSegments.length > 0) {
+        // Render each active segment with its own positioning
+        activeSegments.forEach(function(segment) {
+          var captionText = null;
+          
+          // Include speaker name only if speaker recognition is enabled
+          if (options.speakerRecognitionEnabled && segment.speaker) {
+            if (options.speakerNames && options.speakerNames[segment.speaker]) {
+              captionText = options.speakerNames[segment.speaker] + ": " + segment.text;
+            } else {
+              captionText = segment.speaker + ": " + segment.text;
+            }
           } else {
-            captionText = segment.speaker + ": " + segment.text;
+            captionText = segment.text;
           }
-        } else {
-          captionText = segment.text;
-        }
-        useSubtitleStyle = true;
+          
+          if (captionText) {
+            // Draw subtitle with custom formatting for this specific segment
+            drawSubtitleWithCustomFormatting(context, captionText, options, segment);
+          }
+        });
       }
       // When timed captions are present, never show static caption
     } else {
       // Only show static caption when no timed captions are provided
-      captionText = options.caption;
-    }
-    
-    if (captionText) {
-      if (useSubtitleStyle) {
-        // Draw subtitle with custom formatting
-        drawSubtitleWithCustomFormatting(context, captionText, options);
-      } else {
+      var captionText = options.caption;
+      if (captionText) {
         wrapText(context, captionText);
       }
     }
@@ -325,7 +326,7 @@ module.exports = function(t) {
     }
   }
 
-  function drawSubtitleWithCustomFormatting(context, text, options) {
+  function drawSubtitleWithCustomFormatting(context, text, options, segment) {
     // Save current context state
     context.save();
     
@@ -337,8 +338,15 @@ module.exports = function(t) {
     var currentFormatting = formatting.global || {};
     var speaker = null;
     
-    // Check if this is a speaker-specific caption
-    if (text.indexOf(": ") > 0) {
+    // Use segment.speaker if available (more reliable than parsing text)
+    if (segment && segment.speaker) {
+      speaker = segment.speaker;
+      // Use speaker-specific formatting if available
+      if (formatting.speakers && formatting.speakers[speaker]) {
+        currentFormatting = formatting.speakers[speaker];
+      }
+    } else if (text.indexOf(": ") > 0) {
+      // Fallback to parsing text if segment.speaker not available
       var speakerMatch = text.match(/^([^:]+):\s*(.*)$/);
       if (speakerMatch) {
         var speakerName = speakerMatch[1];

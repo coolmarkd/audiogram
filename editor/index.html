@@ -61,6 +61,13 @@
               </label>
               <div class="note">Identify different speakers (Host, Guest, etc.)</div>
               
+              <label class="checkbox-label">
+                <input type="checkbox" id="enable-disfluencies">
+                <span class="checkmark"></span>
+                Transcribe Disfluencies
+              </label>
+              <div class="note">Include filler words like "umm", "uh", "you know" in transcription</div>
+              
               <div id="speaker-count-options" class="speaker-count-section">
                 <label for="speaker-count-type">Speaker Count Setting:</label>
                 <select id="speaker-count-type">
@@ -73,6 +80,23 @@
                   <label for="speaker-count-value">Number of speakers:</label>
                   <input type="number" id="speaker-count-value" min="1" max="10" value="2">
                   <div class="note" id="speaker-count-note">Set the minimum number of speakers to detect</div>
+                </div>
+              </div>
+              
+              <div id="keyterms-section" class="keyterms-section">
+                <label for="keyterms-text">Keyterms for Better Accuracy:</label>
+                <div class="note">Add domain-specific words or phrases (up to 1000 for Slam-1, 200 for Universal) to improve transcription accuracy. One term per line.</div>
+                
+                <div class="keyterms-controls">
+                  <button type="button" id="keyterms-upload-btn" class="keyterms-btn">📁 Upload from File</button>
+                  <button type="button" id="keyterms-export-btn" class="keyterms-btn">💾 Export to File</button>
+                  <button type="button" id="keyterms-clear-btn" class="keyterms-btn">🗑️ Clear All</button>
+                  <input type="file" id="keyterms-file-input" accept=".txt" style="display: none;">
+                </div>
+                
+                <textarea id="keyterms-text" placeholder="Enter keyterms here, one per line...&#10;Example:&#10;medical diagnosis&#10;hypertension&#10;Wellbutrin XL 150mg&#10;differential diagnosis"></textarea>
+                <div class="keyterms-count">
+                  <span id="keyterms-count">0</span> terms (max 1000 for Slam-1, 200 for Universal)
                 </div>
               </div>
             </div>

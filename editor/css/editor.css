@@ -243,6 +243,76 @@ input[type='text'] {
   font-style: italic;
 }
 
+.keyterms-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.keyterms-section label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.keyterms-section .note {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}
+
+.keyterms-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.keyterms-btn {
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.keyterms-btn:hover {
+  background: #e9ecef;
+}
+
+.keyterms-btn:active {
+  background: #dee2e6;
+}
+
+#keyterms-text {
+  width: 100%;
+  min-height: 120px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: monospace;
+  resize: vertical;
+  margin-bottom: 0.5rem;
+}
+
+.keyterms-count {
+  font-size: 12px;
+  color: #666;
+  text-align: right;
+}
+
+.keyterms-count.warning {
+  color: #ff6b35;
+}
+
+.keyterms-count.error {
+  color: #dc3545;
+}
+
 #captions-header h3 {
   margin: 0;
   font-size: 18px;

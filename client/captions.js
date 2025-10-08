@@ -11,8 +11,10 @@ module.exports = function() {
       previewPlaying = false,
       speakerNames = {}, // Map of speaker labels to custom names
       speakerRecognitionEnabled = true, // Whether speaker recognition is enabled
+      disfluenciesEnabled = false, // Whether to transcribe disfluencies
       speakerCountType = "auto", // "auto", "minimum", or "exact"
       speakerCountValue = 2, // Number of speakers
+      keyterms = [], // Array of keyterms for transcription accuracy
       captionFormatting = {
         global: {
           x: 50,
@@ -66,6 +68,12 @@ module.exports = function() {
       if (onUpdate) onUpdate();
     });
 
+    // Set up disfluencies toggle
+    d3.select("#enable-disfluencies").on("change", function() {
+      disfluenciesEnabled = this.checked;
+      if (onUpdate) onUpdate();
+    });
+
     // Set up speaker count type selector
     d3.select("#speaker-count-type").on("change", function() {
       speakerCountType = this.value;
@@ -78,6 +86,9 @@ module.exports = function() {
       speakerCountValue = +this.value;
       if (onUpdate) onUpdate();
     });
+
+    // Set up keyterms controls
+    setupKeytermsControls();
 
     // Set up formatting tabs
     d3.selectAll(".formatting-tab").on("click", function() {
@@ -138,10 +149,12 @@ module.exports = function() {
     var formattingEditor = d3.select("#caption-formatting-editor");
     var waveformEditor = d3.select("#waveform-positioning-editor");
     var speakerCountOptions = d3.select("#speaker-count-options");
+    var keytermsSection = d3.select("#keyterms-section");
     
     if (isAuto) {
       formattingEditor.classed("hidden", false);
       waveformEditor.classed("hidden", false);
+      keytermsSection.classed("hidden", false);
       
       if (speakerRecognitionEnabled) {
         speakerEditor.classed("hidden", false);
@@ -155,6 +168,7 @@ module.exports = function() {
       formattingEditor.classed("hidden", true);
       waveformEditor.classed("hidden", true);
       speakerCountOptions.classed("hidden", true);
+      keytermsSection.classed("hidden", true);
     }
   }
 
@@ -362,12 +376,20 @@ module.exports = function() {
     return speakerRecognitionEnabled;
   }
 
+  function isDisfluenciesEnabled() {
+    return disfluenciesEnabled;
+  }
+
   function getSpeakerCountType() {
     return speakerCountType;
   }
 
   function getSpeakerCountValue() {
     return speakerCountValue;
+  }
+
+  function getKeyterms() {
+    return keyterms;
   }
 
   function switchFormattingTab(tab) {
@@ -513,6 +535,88 @@ module.exports = function() {
       d3.select("#waveform-smoothing-value").text(this.value + "%");
       if (onUpdate) onUpdate();
     });
+  }
+
+  function setupKeytermsControls() {
+    // Set up keyterms textarea
+    d3.select("#keyterms-text").on("input", function() {
+      updateKeytermsFromText();
+      updateKeytermsCount();
+      if (onUpdate) onUpdate();
+    });
+
+    // Set up upload button
+    d3.select("#keyterms-upload-btn").on("click", function() {
+      d3.select("#keyterms-file-input").node().click();
+    });
+
+    // Set up file input
+    d3.select("#keyterms-file-input").on("change", function() {
+      var file = this.files[0];
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          d3.select("#keyterms-text").property("value", e.target.result);
+          updateKeytermsFromText();
+          updateKeytermsCount();
+          if (onUpdate) onUpdate();
+        };
+        reader.readAsText(file);
+      }
+    });
+
+    // Set up export button
+    d3.select("#keyterms-export-btn").on("click", function() {
+      exportKeytermsToFile();
+    });
+
+    // Set up clear button
+    d3.select("#keyterms-clear-btn").on("click", function() {
+      d3.select("#keyterms-text").property("value", "");
+      updateKeytermsFromText();
+      updateKeytermsCount();
+      if (onUpdate) onUpdate();
+    });
+
+    // Initialize keyterms count
+    updateKeytermsCount();
+  }
+
+  function updateKeytermsFromText() {
+    var text = d3.select("#keyterms-text").property("value");
+    keyterms = text.split('\n')
+      .map(function(line) { return line.trim(); })
+      .filter(function(line) { return line.length > 0; });
+  }
+
+  function updateKeytermsCount() {
+    var count = keyterms.length;
+    var countElement = d3.select("#keyterms-count");
+    var countContainer = d3.select(".keyterms-count");
+    
+    countElement.text(count);
+    
+    // Update styling based on count
+    countContainer.classed("warning", count > 200 && count <= 1000);
+    countContainer.classed("error", count > 1000);
+  }
+
+  function exportKeytermsToFile() {
+    var text = d3.select("#keyterms-text").property("value");
+    if (!text.trim()) {
+      alert("No keyterms to export");
+      return;
+    }
+
+    var blob = new Blob([text], { type: 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'keyterms.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   function setupPreviewUpdateTriggers() {
@@ -702,7 +806,7 @@ module.exports = function() {
       .attr("type", "text")
       .attr("class", "speaker-name-input")
       .property("value", function(speaker) { return speakerNames[speaker] || speaker; })
-      .on("input", function(speaker) {
+      .on("blur", function(speaker) {
         var newName = d3.select(this).property("value");
         setSpeakerName(speaker, newName);
         renderSpeakerFormattingEditor(); // Update formatting editor with new names
@@ -805,16 +909,19 @@ module.exports = function() {
     var previewCaption = document.getElementById('preview-caption');
     if (!previewCaption) return;
 
-    // Find current segment
-    var currentSegment = null;
+    // Find ALL current segments (support multiple speakers)
+    var currentSegments = [];
     for (var i = 0; i < segments.length; i++) {
       if (previewTime >= segments[i].start && previewTime <= segments[i].end) {
-        currentSegment = segments[i];
-        break;
+        currentSegments.push(segments[i]);
       }
     }
 
-    if (currentSegment) {
+    if (currentSegments.length > 0) {
+      // For now, show the first segment in the preview
+      // TODO: In the future, we could create multiple preview elements for multiple speakers
+      var currentSegment = currentSegments[0];
+      
       previewCaption.style.display = 'block';
       
       // Build caption text with speaker name if enabled (matching renderer logic)
@@ -872,8 +979,10 @@ module.exports = function() {
     setSpeakerName: setSpeakerName,
     getUniqueSpeakers: getUniqueSpeakers,
     isSpeakerRecognitionEnabled: isSpeakerRecognitionEnabled,
+    isDisfluenciesEnabled: isDisfluenciesEnabled,
     getSpeakerCountType: getSpeakerCountType,
     getSpeakerCountValue: getSpeakerCountValue,
+    getKeyterms: getKeyterms,
     getCaptionFormatting: getCaptionFormatting,
     getWaveformPositioning: getWaveformPositioning,
     getWaveformConfig: getWaveformConfig,

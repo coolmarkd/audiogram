@@ -36,9 +36,21 @@ function validate(req, res, next) {
   // Handle speaker recognition flag
   req.body.speakerRecognitionEnabled = req.body.speakerRecognitionEnabled === "true" || req.body.speakerRecognitionEnabled === true;
 
+  // Handle disfluencies flag
+  req.body.disfluenciesEnabled = req.body.disfluenciesEnabled === "true" || req.body.disfluenciesEnabled === true;
+
   // Handle speaker count settings
   req.body.speakerCountType = req.body.speakerCountType || "auto";
   req.body.speakerCountValue = req.body.speakerCountValue ? parseInt(req.body.speakerCountValue) : 2;
+
+  // Handle keyterms
+  if (req.body.keyterms) {
+    try {
+      req.body.keyterms = JSON.parse(req.body.keyterms);
+    } catch(e) {
+      return res.status(500).send("Invalid keyterms data.");
+    }
+  }
 
   // Parse timed captions if provided
   if (req.body.timedCaptions) {
