@@ -178,7 +178,9 @@ module.exports = function() {
       d3.select("#webvtt-file-input").node().click();
     });
 
-    d3.select("#webvtt-file-input").on("change", handleWebVTTUpload);
+    d3.select("#webvtt-file-input").on("change", function() {
+      handleWebVTTUpload(d3.event);
+    });
 
     updateUI();
     updateSpeakerRecognitionUI();
@@ -1248,8 +1250,22 @@ module.exports = function() {
 
   // Handle WebVTT file upload
   function handleWebVTTUpload(event) {
+    if (!event || !event.target || !event.target.files) {
+      console.error("Invalid event object in handleWebVTTUpload");
+      return;
+    }
+
     var file = event.target.files[0];
-    if (!file) return;
+    if (!file) {
+      console.log("No file selected");
+      return;
+    }
+
+    // Validate file type
+    if (!file.name.toLowerCase().endsWith('.vtt')) {
+      alert("Please select a .vtt file");
+      return;
+    }
 
     var reader = new FileReader();
     reader.onload = function(e) {
