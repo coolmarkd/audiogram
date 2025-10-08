@@ -14,16 +14,6 @@ var config = {
 console.log("Audiogram application starting...");
 console.log("Base URL:", config.baseUrl);
 
-// Fetch and display git commit hash
-d3.json("/git-info", function(err, gitInfo) {
-  if (!err && gitInfo) {
-    console.log("Git commit hash:", gitInfo.gitCommitHash);
-    console.log("Build timestamp:", gitInfo.timestamp);
-  } else {
-    console.log("Git commit hash: Not available");
-  }
-});
-
 // Load configuration from server
 d3.json("/config.json", function(err, serverConfig) {
   if (!err && serverConfig) {
@@ -34,6 +24,16 @@ d3.json("/config.json", function(err, serverConfig) {
     console.error("Error loading config.json:", err);
     console.log("Using fallback baseUrl:", config.baseUrl);
   }
+  
+  // Fetch and display git commit hash using the correct base URL
+  d3.json(config.baseUrl + "/git-info", function(err, gitInfo) {
+    if (!err && gitInfo) {
+      console.log("Git commit hash:", gitInfo.gitCommitHash);
+      console.log("Build timestamp:", gitInfo.timestamp);
+    } else {
+      console.log("Git commit hash: Not available");
+    }
+  });
   
   // Now load themes with the correct base URL
   loadThemes();
