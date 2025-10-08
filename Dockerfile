@@ -37,6 +37,9 @@ RUN chown -R audiogram:audiogram /home/audiogram
 # Copy files to working directory (as root)
 RUN cp -r /tmp/audiogram/* /home/audiogram/audiogram/
 
+# Set proper ownership of copied files (as root)
+RUN chown -R audiogram:audiogram /home/audiogram/audiogram
+
 # Clean up temporary directory (as root)
 RUN rm -rf /tmp/audiogram
 
