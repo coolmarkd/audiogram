@@ -21,21 +21,24 @@ RUN apt-get install -y \
 # Set Python3 as default python for node-gyp
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
+# Clone the repository from GitHub (as root)
+ARG CACHEBUST=1 # Force rebuild
+#RUN echo "Always Git!" &&  date && git clone https://github.com/coolmarkd/audiogram /tmp/audiogram
+RUN echo "Always Git!" &&  date && git clone -b feature/autocaption https://github.com/coolmarkd/audiogram /tmp/audiogram
+
+# Get git commit hash from the cloned repository
+RUN cd /tmp/audiogram && git rev-parse HEAD > /tmp/git_commit_hash.txt
+
 # Non-privileged user
 RUN useradd -m audiogram
 USER audiogram
 WORKDIR /home/audiogram/audiogram
 
-# Clone the repository from GitHub
-ARG CACHEBUST=1 # Force rebuild
-#RUN echo "Always Git!" &&  date && git clone https://github.com/coolmarkd/audiogram /tmp/audiogram
-RUN echo "Always Git!" &&  date && git clone -b feature/autocaption https://github.com/coolmarkd/audiogram /tmp/audiogram
-
+# Copy files to working directory
 RUN cp -r /tmp/audiogram/* ./
 RUN rm -rf /tmp/audiogram
 
-# Get git commit hash and set as build argument
-RUN git rev-parse HEAD > /tmp/git_commit_hash.txt
+# Set git commit hash as build argument
 ARG GIT_COMMIT_HASH
 RUN if [ -z "$GIT_COMMIT_HASH" ]; then \
       GIT_COMMIT_HASH=$(cat /tmp/git_commit_hash.txt); \
