@@ -75,11 +75,18 @@ module.exports = function() {
     });
 
     // Set up speaker count type selector
-    d3.select("#speaker-count-type").on("change", function() {
-      speakerCountType = this.value;
-      updateSpeakerCountUI();
-      if (onUpdate) onUpdate();
-    });
+    var speakerCountTypeSelect = d3.select("#speaker-count-type");
+    if (speakerCountTypeSelect.empty()) {
+      console.warn("Speaker count type select element not found");
+    } else {
+      console.log("Speaker count type select element found, attaching event listener");
+      speakerCountTypeSelect.on("change", function() {
+        console.log("Speaker count type changed to: " + this.value);
+        speakerCountType = this.value;
+        updateSpeakerCountUI();
+        if (onUpdate) onUpdate();
+      });
+    }
 
     // Set up speaker count value input
     d3.select("#speaker-count-value").on("input", function() {
