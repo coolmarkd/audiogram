@@ -31,7 +31,8 @@ function drawFrames(renderer, options, cb) {
       waveform: options.waveform[frameNumber],
       frame: frameNumber,
       currentTime: currentTime,
-      timedCaptions: options.timedCaptions
+      timedCaptions: options.timedCaptions,
+      speakerNames: options.speakerNames
     });
 
     canvas.toBuffer(function(err, buf){

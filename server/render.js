@@ -42,6 +42,15 @@ function validate(req, res, next) {
     }
   }
 
+  // Parse speaker names if provided
+  if (req.body.speakerNames) {
+    try {
+      req.body.speakerNames = JSON.parse(req.body.speakerNames);
+    } catch(e) {
+      return res.status(500).send("Invalid speaker names data.");
+    }
+  }
+
   return next();
 
 }

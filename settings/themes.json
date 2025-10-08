@@ -21,7 +21,14 @@
     "subtitleLeft": 100,
     "subtitleRight": 1180,
     "subtitleBackgroundColor": "rgba(0,0,0,0.7)",
-    "subtitlePadding": 10
+    "subtitlePadding": 10,
+    "speakerColors": {
+      "Speaker A": "#4CAF50",
+      "Speaker B": "#2196F3",
+      "Speaker C": "#FF9800",
+      "Speaker D": "#9C27B0",
+      "Speaker E": "#F44336"
+    }
   },
   "Basic": {
     "backgroundColor": "#eee",

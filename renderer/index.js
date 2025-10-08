@@ -78,7 +78,14 @@ module.exports = function(t) {
         return seg.start <= options.currentTime && options.currentTime < seg.end;
       });
       if (segment) {
-        captionText = segment.text;
+        // Include speaker name if available
+        if (segment.speaker && options.speakerNames && options.speakerNames[segment.speaker]) {
+          captionText = options.speakerNames[segment.speaker] + ": " + segment.text;
+        } else if (segment.speaker) {
+          captionText = segment.speaker + ": " + segment.text;
+        } else {
+          captionText = segment.text;
+        }
         useSubtitleStyle = true;
       } else {
         captionText = null;
@@ -106,9 +113,33 @@ module.exports = function(t) {
     var padding = theme.subtitlePadding || 10;
     var bgColor = theme.subtitleBackgroundColor || "rgba(0,0,0,0.7)";
     
+    // Check if text has speaker prefix and apply color
+    var speakerColor = null;
+    var displayText = text;
+    
+    if (text.indexOf(": ") > 0) {
+      var speakerMatch = text.match(/^([^:]+):\s*(.*)$/);
+      if (speakerMatch && theme.speakerColors) {
+        var speakerName = speakerMatch[1];
+        var speakerText = speakerMatch[2];
+        
+        // Find matching speaker color
+        for (var speakerKey in theme.speakerColors) {
+          if (speakerName === speakerKey || speakerName.includes(speakerKey)) {
+            speakerColor = theme.speakerColors[speakerKey];
+            break;
+          }
+        }
+        
+        if (speakerColor) {
+          displayText = speakerText; // Remove speaker name from text, we'll draw it separately
+        }
+      }
+    }
+    
     // Use subtitle wrapper to get text metrics and draw
     // First, we need to measure the text
-    var lines = measureSubtitleLines(context, text);
+    var lines = measureSubtitleLines(context, displayText);
     
     if (lines.length === 0) {
       context.restore();
@@ -130,8 +161,32 @@ module.exports = function(t) {
       totalHeight + padding * 2
     );
     
-    // Draw the subtitle text
-    wrapSubtitle(context, text);
+    // Draw speaker name with color if available
+    if (speakerColor && text.indexOf(": ") > 0) {
+      var speakerMatch = text.match(/^([^:]+):\s*(.*)$/);
+      if (speakerMatch) {
+        var speakerName = speakerMatch[1];
+        var speakerText = speakerMatch[2];
+        
+        // Draw speaker name in color
+        context.fillStyle = speakerColor;
+        context.font = theme.subtitleFont || theme.captionFont;
+        context.textAlign = "center";
+        context.textBaseline = "top";
+        
+        var speakerY = y - 20; // Position above main text
+        context.fillText(speakerName + ":", x, speakerY);
+        
+        // Draw main text in normal color
+        context.fillStyle = theme.subtitleColor || "#fff";
+        wrapSubtitle(context, speakerText);
+      } else {
+        wrapSubtitle(context, displayText);
+      }
+    } else {
+      // Draw the subtitle text normally
+      wrapSubtitle(context, displayText);
+    }
     
     context.restore();
   }

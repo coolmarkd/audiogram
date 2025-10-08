@@ -106,6 +106,7 @@ function submitted() {
     formData.append("caption", caption);
   } else {
     formData.append("timedCaptions", JSON.stringify(timedCaptions));
+    formData.append("speakerNames", JSON.stringify(captionsEditor.getSpeakerNames()));
   }
 
   setClass("loading");

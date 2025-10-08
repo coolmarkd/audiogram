@@ -214,6 +214,7 @@ input[type='text'] {
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   background-color: #fff;
+  flex-wrap: wrap;
 }
 
 .caption-segment:hover {
@@ -229,6 +230,16 @@ input[type='text'] {
   padding-top: 4px;
 }
 
+.speaker-select {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  background-color: #f9f9f9;
+  min-width: 100px;
+}
+
 .caption-text-input {
   flex-grow: 1;
   padding: 4px 8px;
@@ -237,6 +248,7 @@ input[type='text'] {
   border-radius: 3px;
   min-height: 30px;
   resize: vertical;
+  min-width: 200px;
 }
 
 .caption-actions {
@@ -256,6 +268,51 @@ input[type='text'] {
   padding: 2rem;
   color: #999;
   font-style: italic;
+}
+
+/* Speaker names editor */
+#speaker-names-editor {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #f0f8ff;
+  border: 1px solid #b0d4f1;
+  border-radius: 4px;
+}
+
+#speaker-names-editor h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 16px;
+  color: #2c5aa0;
+}
+
+#speaker-names-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.speaker-name-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background-color: #fff;
+  border: 1px solid #b0d4f1;
+  border-radius: 4px;
+}
+
+.speaker-label {
+  font-weight: bold;
+  color: #2c5aa0;
+  min-width: 80px;
+}
+
+.speaker-name-input {
+  padding: 4px 8px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  min-width: 120px;
 }
 
 /* Preview canvas */

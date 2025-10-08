@@ -4,10 +4,10 @@ This document describes the automatic caption generation feature for Audiogram u
 
 ## Overview
 
-The auto-captions feature allows you to automatically generate timed captions from audio files using speech-to-text transcription. Users can choose between:
+The auto-captions feature allows you to automatically generate timed captions from audio files using speech-to-text transcription with speaker recognition. Users can choose between:
 
 - **Static Caption**: A single caption displayed throughout the video (existing functionality)
-- **Auto-Generate**: Timed captions generated via speech transcription with manual editing capability
+- **Auto-Generate**: Timed captions with speaker identification, generated via speech transcription with manual editing capability
 
 ## Installation
 
@@ -64,25 +64,33 @@ This is the default mode and works exactly as before:
 
 ### Caption Mode: Auto-Generate
 
-This mode enables automatic transcription and timed captions:
+This mode enables automatic transcription with speaker recognition and timed captions:
 
-1. **Transcription**: Audio is transcribed using Whisper
-2. **Segment Generation**: Text is broken into 2-3 second caption blocks
-3. **Manual Editing**: Edit each caption segment:
+1. **Transcription**: Audio is transcribed using AssemblyAI with speaker diarization
+2. **Speaker Recognition**: Different speakers are automatically identified (Speaker A, Speaker B, etc.)
+3. **Segment Generation**: Text is broken into 2-3 second caption blocks per speaker
+4. **Manual Editing**: Edit each caption segment:
    - Modify text content
+   - Change speaker assignments
+   - Customize speaker names (e.g., "Speaker A" → "Host", "Speaker B" → "Guest")
    - Delete unwanted segments
    - Timestamps are automatically assigned
-4. **Video Generation**: Captions appear/disappear at specified times
+5. **Video Generation**: Captions appear/disappear at specified times with speaker names and colors
 
 ### Caption Editor Features
 
 When in Auto-Generate mode, you'll see:
 
+- **Speaker Names Editor**: Customize speaker names:
+  - Speaker A: [Host]
+  - Speaker B: [Guest]
+  - Speaker C: [Moderator]
 - **Caption Segments List**: Each segment shows:
   - Timestamp range (start → end)
+  - Speaker selector dropdown
   - Editable text field
   - Delete button
-- **Generate Captions Button**: Triggers transcription
+- **Generate Captions Button**: Triggers transcription with speaker recognition
 - **Real-time Editing**: Changes are saved automatically
 
 ## Theme Configuration
@@ -102,7 +110,14 @@ Timed captions use different styling from static captions. Configure in `setting
   "subtitleBackgroundColor": "rgba(0,0,0,0.7)",  // Background color
   "subtitlePadding": 10,           // Padding around text (px)
   "subtitleColor": "#fff",         // Text color
-  "subtitleAlign": "center"        // Text alignment
+  "subtitleAlign": "center",       // Text alignment
+  "speakerColors": {               // Speaker name colors
+    "Speaker A": "#4CAF50",        // Green
+    "Speaker B": "#2196F3",        // Blue
+    "Speaker C": "#FF9800",        // Orange
+    "Speaker D": "#9C27B0",        // Purple
+    "Speaker E": "#F44336"         // Red
+  }
 }
 ```
 
@@ -110,7 +125,9 @@ Timed captions use different styling from static captions. Configure in `setting
 
 - **Static Captions**: Use `captionFont`, `captionTop`, `captionColor`, etc.
 - **Timed Captions**: Use `subtitleFont`, `subtitleBottom`, `subtitleBackgroundColor`, etc.
+- **Speaker Names**: Displayed above caption text in custom colors
 - Timed captions automatically include a semi-transparent background for better readability
+- Each speaker gets a unique color for easy identification
 
 ## Technical Details
 
