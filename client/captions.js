@@ -196,6 +196,9 @@ module.exports = function() {
     
     // Initialize preview
     initPreview();
+    
+    // Set up audio selection change listener
+    setupAudioSelectionListener();
   }
 
   function updateUI() {
@@ -369,7 +372,130 @@ module.exports = function() {
         });
       }
     });
-    return updated;
+    
+    // Filter segments based on audio selection if available
+    return filterSegmentsByAudioSelection(updated);
+  }
+
+  function filterSegmentsByAudioSelection(segments) {
+    // Get current audio selection from preview
+    var audioSelection = null;
+    if (window.preview && window.preview.selection) {
+      audioSelection = window.preview.selection();
+    }
+    
+    // If no audio selection or full audio is selected, return all segments
+    if (!audioSelection || (!audioSelection.start && !audioSelection.end)) {
+      return segments;
+    }
+    
+    var startTime = audioSelection.start || 0;
+    var endTime = audioSelection.end || Infinity;
+    
+    // Filter segments that overlap with the selected audio time range
+    return segments.filter(function(segment) {
+      // Include segments that overlap with the selection
+      // A segment overlaps if: segment.start < endTime AND segment.end > startTime
+      return segment.start < endTime && segment.end > startTime;
+    }).map(function(segment) {
+      // Adjust segment times to be relative to the selection start
+      var adjustedSegment = {
+        start: Math.max(0, segment.start - startTime),
+        end: Math.min(endTime - startTime, segment.end - startTime),
+        text: segment.text,
+        speaker: segment.speaker
+      };
+      return adjustedSegment;
+    });
+  }
+
+  function isSegmentInAudioSelection(segment) {
+    // Get current audio selection from preview
+    var audioSelection = null;
+    if (window.preview && window.preview.selection) {
+      audioSelection = window.preview.selection();
+    }
+    
+    // If no audio selection or full audio is selected, all segments are "selected"
+    if (!audioSelection || (!audioSelection.start && !audioSelection.end)) {
+      return true;
+    }
+    
+    var startTime = audioSelection.start || 0;
+    var endTime = audioSelection.end || Infinity;
+    
+    // Check if segment overlaps with the selection
+    return segment.start < endTime && segment.end > startTime;
+  }
+
+  function getSelectedSegmentsCount() {
+    if (!segments || segments.length === 0) {
+      return 0;
+    }
+    
+    var selectedCount = 0;
+    for (var i = 0; i < segments.length; i++) {
+      if (isSegmentInAudioSelection(segments[i])) {
+        selectedCount++;
+      }
+    }
+    return selectedCount;
+  }
+
+  function updateSegmentSelectionHighlighting() {
+    // Update the CSS classes of existing segment elements without rebuilding DOM
+    d3.selectAll(".caption-segment").each(function(d, i) {
+      var element = d3.select(this);
+      var isSelected = isSegmentInAudioSelection(segments[i]);
+      
+      if (isSelected) {
+        element.classed("selected", true);
+      } else {
+        element.classed("selected", false);
+      }
+    });
+  }
+
+  function setupAudioSelectionListener() {
+    // Listen for audio selection changes by hooking into the minimap brush events
+    // This is more efficient than polling
+    if (window.minimap && window.minimap.onBrushEnd) {
+      window.minimap.onBrushEnd(function(extent) {
+        if (segments.length > 0) {
+          // Update selection highlighting without rebuilding DOM
+          updateSegmentSelectionHighlighting();
+          
+          // Update preview if it's playing
+          if (previewPlaying) {
+            updatePreviewCaption();
+          }
+          
+          // Update main canvas preview
+          if (window.preview && window.preview.redraw) {
+            window.preview.redraw();
+          }
+        }
+      });
+    } else {
+      // Fallback: Listen for audio selection changes by checking periodically
+      // This is a simple approach if minimap events are not available
+      setInterval(function() {
+        if (segments.length > 0) {
+          // Update selection highlighting without rebuilding DOM
+          updateSegmentSelectionHighlighting();
+          
+          // Update preview if it's playing
+          if (previewPlaying) {
+            updatePreviewCaption();
+          }
+          
+          // Update main canvas preview
+          if (window.preview && window.preview.redraw) {
+            window.preview.redraw();
+          }
+        }
+      }, 500); // Check every 500ms
+    }
   }
 
   function renderSegments() {
@@ -443,6 +569,9 @@ module.exports = function() {
         d3.event.preventDefault();
         deleteSegment(i);
       });
+    
+    // Update selection highlighting after rendering
+    updateSegmentSelectionHighlighting();
   }
 
   function deleteSegment(index) {
@@ -1034,11 +1163,14 @@ module.exports = function() {
     var previewCaption = document.getElementById('preview-caption');
     if (!previewCaption) return;
 
+    // Get filtered segments based on audio selection
+    var filteredSegments = filterSegmentsByAudioSelection(segments);
+    
     // Find ALL current segments (support multiple speakers)
     var currentSegments = [];
-    for (var i = 0; i < segments.length; i++) {
-      if (previewTime >= segments[i].start && previewTime <= segments[i].end) {
-        currentSegments.push(segments[i]);
+    for (var i = 0; i < filteredSegments.length; i++) {
+      if (previewTime >= filteredSegments[i].start && previewTime <= filteredSegments[i].end) {
+        currentSegments.push(filteredSegments[i]);
       }
     }
 
@@ -1302,7 +1434,10 @@ module.exports = function() {
     stopPreview: stopPreview,
     exportToWebVTT: exportToWebVTT,
     importFromWebVTT: importFromWebVTT,
-    handleWebVTTUpload: handleWebVTTUpload
+    handleWebVTTUpload: handleWebVTTUpload,
+    getSelectedSegmentsCount: getSelectedSegmentsCount,
+    filterSegmentsByAudioSelection: filterSegmentsByAudioSelection,
+    updateSegmentSelectionHighlighting: updateSegmentSelectionHighlighting
   };
 
 };

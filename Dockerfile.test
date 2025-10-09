@@ -21,31 +21,28 @@ RUN apt-get install -y \
 # Set Python3 as default python for node-gyp
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
-# Clone the repository from GitHub (as root)
-ARG CACHEBUST=1 # Force rebuild
-#RUN echo "Always Git!" &&  date && git clone https://github.com/coolmarkd/audiogram /tmp/audiogram
-RUN echo "Always Git!" &&  date && git clone -b feature/autocaption https://github.com/coolmarkd/audiogram /tmp/audiogram
-#COPY /Users/markd/audiogram /tmp/audiogram
-# Get git commit hash from the cloned repository
-RUN cd /tmp/audiogram && git rev-parse HEAD > /tmp/git_commit_hash.txt
-
 # Create user and set up working directory
 RUN useradd -m audiogram
 RUN mkdir -p /home/audiogram/audiogram
 RUN chown -R audiogram:audiogram /home/audiogram
 
-# Copy files to working directory (as root)
-RUN cp -r /tmp/audiogram/* /home/audiogram/audiogram/
+# Copy all local files to working directory (as root)
+# This includes all source code, config files, and assets
+COPY . /home/audiogram/audiogram/
 
 # Set proper ownership of copied files (as root)
 RUN chown -R audiogram:audiogram /home/audiogram/audiogram
 
-# Clean up temporary directory (as root)
-RUN rm -rf /tmp/audiogram
-
 # Switch to non-privileged user
 USER audiogram
 WORKDIR /home/audiogram/audiogram
+
+# Get git commit hash from the local repository (if available)
+RUN if [ -d ".git" ]; then \
+      git rev-parse HEAD > /tmp/git_commit_hash.txt 2>/dev/null || echo "no-git" > /tmp/git_commit_hash.txt; \
+    else \
+      echo "no-git" > /tmp/git_commit_hash.txt; \
+    fi
 
 # Set git commit hash as build argument
 ARG GIT_COMMIT_HASH
@@ -54,7 +51,6 @@ RUN if [ -z "$GIT_COMMIT_HASH" ]; then \
     fi && \
     echo "Git commit hash: $GIT_COMMIT_HASH" && \
     echo "GIT_COMMIT_HASH=$GIT_COMMIT_HASH" > /home/audiogram/audiogram/.env.git
-
 
 # Set environment variables for canvas compilation
 ENV PYTHON=/usr/bin/python3

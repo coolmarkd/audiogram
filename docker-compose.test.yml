@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  audiogram-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    ports:
+      - "8888:8888"
+    environment:
+      - ASSEMBLYAI_API_KEY=${ASSEMBLYAI_API_KEY}
+      - PORT=8888
+    volumes:
+      # Mount local directory for development (optional)
+      # Uncomment the line below if you want to mount the local directory
+      # - .:/home/audiogram/audiogram
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add Redis service if needed for testing
+  # redis-test:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   restart: unless-stopped
