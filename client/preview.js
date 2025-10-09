@@ -111,7 +111,9 @@ function redraw() {
     speakerRecognitionEnabled: speakerRecognitionEnabled,
     captionFormatting: captionFormatting,
     waveformPositioning: waveformPositioning,
-    waveformConfig: waveformConfig
+    waveformConfig: waveformConfig,
+    layoutManager: window.captionsEditor ? window.captionsEditor.getLayoutManager() : null,
+    showZoneBoundaries: document.getElementById("show-zone-boundaries") ? document.getElementById("show-zone-boundaries").checked : false
   });
 
 }

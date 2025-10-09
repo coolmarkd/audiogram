@@ -83,6 +83,11 @@ module.exports = function(t) {
       console.warn("No waveform data provided for frame", options.frame);
     }
 
+    // Render zone boundaries if in preview mode
+    if (options.showZoneBoundaries && theme.captionZones) {
+      renderZoneBoundaries(context, theme.captionZones, theme);
+    }
+
     // Write the caption (static or timed)
     if (options.timedCaptions && options.currentTime !== undefined) {
       // Find ALL active segments for this time (support multiple speakers)
@@ -392,6 +397,192 @@ module.exports = function(t) {
     var theme = options.theme || {};
     var formatting = options.captionFormatting || {};
     var speakerNames = options.speakerNames || {};
+    var layoutManager = options.layoutManager;
+    
+    // Use intelligent layout if available
+    if (layoutManager && options.timedCaptions) {
+      var activeSegments = options.timedCaptions.filter(function(seg) {
+        return seg.start <= options.currentTime && options.currentTime < seg.end;
+      });
+      
+      if (activeSegments.length > 0) {
+        var layout = layoutManager.calculateOptimalLayout(activeSegments, theme);
+        var segmentLayout = findSegmentLayout(segment, layout);
+        
+        if (segmentLayout) {
+          drawIntelligentCaption(context, text, options, segment, segmentLayout, theme);
+          context.restore();
+          return;
+        }
+      }
+    }
+    
+    // Fallback to original positioning logic
+    drawLegacyCaption(context, text, options, segment, theme);
+    context.restore();
+  }
+  
+  function findSegmentLayout(segment, layout) {
+    for (var zoneKey in layout.zones) {
+      var zoneSegments = layout.zones[zoneKey];
+      for (var i = 0; i < zoneSegments.length; i++) {
+        if (zoneSegments[i] === segment) {
+          return {
+            zone: zoneKey,
+            index: i,
+            totalInZone: zoneSegments.length
+          };
+        }
+      }
+    }
+    return null;
+  }
+  
+  function drawIntelligentCaption(context, text, options, segment, segmentLayout, theme) {
+    var formatting = options.captionFormatting || {};
+    var speakerNames = options.speakerNames || {};
+    var captionZones = theme.captionZones || {};
+    var captionDefaults = theme.captionDefaults || {};
+    var zone = captionZones[segmentLayout.zone];
+    
+    if (!zone) return;
+    
+    // Calculate zone dimensions
+    var width = theme.width || 1280;
+    var height = theme.height || 720;
+    var zoneX = (zone.x / 100) * width;
+    var zoneY = (zone.y / 100) * height;
+    var zoneWidth = (zone.width / 100) * width;
+    var zoneHeight = (zone.height / 100) * height;
+    
+    // Calculate position within zone
+    var spacing = zone.spacing || 5;
+    var segmentHeight = zoneHeight / (zone.maxSpeakers || 1);
+    var y = zoneY + (segmentLayout.index * (segmentHeight + spacing));
+    
+    // Determine formatting
+    var currentFormatting = formatting.global || {};
+    var speaker = segment.speaker;
+    
+    if (speaker && formatting.speakers && formatting.speakers[speaker]) {
+      currentFormatting = formatting.speakers[speaker];
+    }
+    
+    // Apply caption defaults
+    var bgColor = currentFormatting.backgroundColor || captionDefaults.backgroundColor || "transparent";
+    var bgOpacity = currentFormatting.backgroundOpacity !== undefined ? 
+      currentFormatting.backgroundOpacity : 
+      (captionDefaults.backgroundOpacity !== undefined ? captionDefaults.backgroundOpacity : 0);
+    var padding = captionDefaults.padding || 8;
+    
+    var displayText = text;
+    var speakerColor = null;
+    
+    // Handle speaker prefix and colors
+    if (text.indexOf(": ") > 0) {
+      var speakerMatch = text.match(/^([^:]+):\s*(.*)$/);
+      if (speakerMatch) {
+        var speakerName = speakerMatch[1];
+        var speakerText = speakerMatch[2];
+        
+        // Use speaker-specific color or theme color
+        if (speaker && formatting.speakers && formatting.speakers[speaker]) {
+          speakerColor = formatting.speakers[speaker].color;
+        } else if (theme.speakerColors) {
+          for (var speakerKey in theme.speakerColors) {
+            if (speakerName === speakerKey || speakerName.includes(speakerKey)) {
+              speakerColor = theme.speakerColors[speakerKey];
+              break;
+            }
+          }
+        }
+        
+        if (speakerColor) {
+          displayText = speakerText;
+        }
+      }
+    }
+    
+    // Calculate optimal font size
+    var maxFontSize = captionDefaults.maxFontSize || 48;
+    var minFontSize = captionDefaults.minFontSize || 16;
+    var fontSize = currentFormatting.fontSize || maxFontSize;
+    
+    if (fontSize === "auto" || fontSize > maxFontSize) {
+      fontSize = calculateOptimalFontSize(displayText, zoneWidth - (padding * 2), segmentHeight - (padding * 2), context, minFontSize, maxFontSize);
+    }
+    
+    // Set font
+    var fontFamily = theme.subtitleFont || theme.captionFont || "Arial";
+    context.font = fontSize + "px " + fontFamily;
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    
+    // Calculate text position
+    var x = zoneX + (zoneWidth / 2);
+    var textY = y + (segmentHeight / 2);
+    
+    // Wrap text if needed
+    var lines = wrapTextToWidth(displayText, zoneWidth - (padding * 2), fontSize, context);
+    var lineHeight = fontSize * (captionDefaults.lineSpacing || 1.2);
+    var totalTextHeight = lines.length * lineHeight;
+    
+    // Adjust Y position for multiple lines
+    textY = y + (segmentHeight / 2) - (totalTextHeight / 2) + (lineHeight / 2);
+    
+    // Draw background if opacity > 0
+    if (bgOpacity > 0 && bgColor !== "transparent") {
+      var bgColorWithOpacity = bgColor + Math.round(bgOpacity * 2.55).toString(16).padStart(2, '0');
+      context.fillStyle = bgColorWithOpacity;
+      context.fillRect(
+        zoneX + padding,
+        y + padding,
+        zoneWidth - (padding * 2),
+        segmentHeight - (padding * 2)
+      );
+    }
+    
+    // Draw text lines
+    var textColor = currentFormatting.color || theme.subtitleColor || "#fff";
+    var strokeWidth = currentFormatting.strokeWidth || captionDefaults.strokeWidth || 0;
+    var strokeColor = currentFormatting.strokeColor || captionDefaults.strokeColor || "#000000";
+    
+    lines.forEach(function(line, index) {
+      var lineY = textY + (index * lineHeight);
+      
+      // Draw stroke if enabled
+      if (strokeWidth > 0) {
+        context.strokeStyle = strokeColor;
+        context.lineWidth = strokeWidth * 2;
+        context.strokeText(line, x, lineY);
+      }
+      
+      // Draw speaker name with color if available
+      if (speakerColor && index === 0 && text.indexOf(": ") > 0) {
+        var speakerMatch = text.match(/^([^:]+):\s*(.*)$/);
+        if (speakerMatch) {
+          var speakerName = speakerMatch[1];
+          var speakerText = speakerMatch[2];
+          
+          // Draw speaker name with color
+          context.fillStyle = speakerColor;
+          context.fillText(speakerName + ": ", x, lineY);
+          
+          // Draw speaker text with default color
+          context.fillStyle = textColor;
+          var speakerNameWidth = context.measureText(speakerName + ": ").width;
+          context.fillText(speakerText, x + speakerNameWidth, lineY);
+        }
+      } else {
+        context.fillStyle = textColor;
+        context.fillText(line, x, lineY);
+      }
+    });
+  }
+  
+  function drawLegacyCaption(context, text, options, segment, theme) {
+    var formatting = options.captionFormatting || {};
+    var speakerNames = options.speakerNames || {};
     
     // Determine which formatting to use
     var currentFormatting = formatting.global || {};
@@ -554,6 +745,87 @@ module.exports = function(t) {
       
       context.fillText(displayText, x, y);
     }
+  }
+  
+  function calculateOptimalFontSize(text, maxWidth, maxHeight, context, minFontSize, maxFontSize) {
+    var words = text.split(' ');
+    var fontSize = maxFontSize;
+    var fits = false;
+    
+    while (fontSize >= minFontSize && !fits) {
+      var lines = wrapTextToWidth(text, maxWidth, fontSize, context);
+      var lineHeight = fontSize * 1.2;
+      var totalHeight = lines.length * lineHeight;
+      
+      if (totalHeight <= maxHeight) {
+        fits = true;
+      } else {
+        fontSize -= 2;
+      }
+    }
+    
+    return Math.max(fontSize, minFontSize);
+  }
+  
+  function wrapTextToWidth(text, maxWidth, fontSize, context) {
+    var words = text.split(' ');
+    var lines = [];
+    var currentLine = [];
+    
+    words.forEach(function(word) {
+      var testLine = [...currentLine, word].join(' ');
+      context.font = fontSize + "px Arial";
+      var metrics = context.measureText(testLine);
+      
+      if (metrics.width <= maxWidth) {
+        currentLine.push(word);
+      } else {
+        if (currentLine.length > 0) {
+          lines.push(currentLine.join(' '));
+          currentLine = [word];
+        } else {
+          lines.push(word);
+        }
+      }
+    });
+    
+    if (currentLine.length > 0) {
+      lines.push(currentLine.join(' '));
+    }
+    
+    return lines;
+  }
+  
+  function renderZoneBoundaries(context, captionZones, theme) {
+    context.save();
+    
+    var width = theme.width || 1280;
+    var height = theme.height || 720;
+    
+    Object.keys(captionZones).forEach(function(zoneKey) {
+      var zone = captionZones[zoneKey];
+      var x = (zone.x / 100) * width;
+      var y = (zone.y / 100) * height;
+      var zoneWidth = (zone.width / 100) * width;
+      var zoneHeight = (zone.height / 100) * height;
+      
+      // Draw zone boundary
+      context.strokeStyle = '#00ff00';
+      context.lineWidth = 2;
+      context.setLineDash([5, 5]);
+      context.strokeRect(x, y, zoneWidth, zoneHeight);
+      
+      // Draw zone label
+      context.fillStyle = '#00ff00';
+      context.font = '12px Arial';
+      context.textAlign = 'left';
+      context.textBaseline = 'top';
+      context.fillText(zoneKey, x + 5, y + 5);
+      
+      // Draw zone info
+      var info = 'Max: ' + (zone.maxSpeakers || 1) + ' speakers';
+      context.fillText(info, x + 5, y + 20);
+    });
     
     context.restore();
   }

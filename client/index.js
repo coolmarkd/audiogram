@@ -74,8 +74,9 @@ function loadThemes() {
 });
 
 function submitted() {
-
-  d3.event.preventDefault();
+  if (d3.event && d3.event.preventDefault) {
+    d3.event.preventDefault();
+  }
 
   var theme = preview.theme(),
       caption = preview.caption(),
@@ -157,16 +158,54 @@ function poll(id) {
   setTimeout(function(){
     $.ajax({
       url: config.baseUrl + "/status/" + id + "/",
-      error: error,
+      error: function(xhr, status, errorMsg) {
+        console.error("Status polling error:", status, errorMsg);
+        error("Failed to check video status: " + errorMsg);
+      },
       dataType: "json",
       success: function(result){
+        console.log("Status poll result:", result);
+        
         if (result && result.status && result.status === "ready" && result.url) {
-          video.update(result.url, preview.theme().name);
+          console.log("Video ready, URL:", result.url);
+          
+          // Get theme name safely
+          var themeName = "Audiogram"; // fallback
+          try {
+            if (preview && preview.theme && typeof preview.theme === 'function') {
+              var currentTheme = preview.theme();
+              if (currentTheme && currentTheme.name) {
+                themeName = currentTheme.name;
+              }
+            }
+          } catch (e) {
+            console.warn("Could not get theme name:", e);
+          }
+          
+          console.log("Using theme name:", themeName);
+          video.update(result.url, themeName);
           setClass("rendered");
           
           // Show regenerate button
           d3.select("#regenerate").classed("hidden", false);
+          
+          // Debug: Check if UI elements are visible
+          setTimeout(function() {
+            var videoElement = document.getElementById("video");
+            var downloadElement = document.getElementById("download");
+            var bodyElement = document.body;
+            
+            console.log("UI State Debug:");
+            console.log("- Body classes:", bodyElement.className);
+            console.log("- Video element:", videoElement);
+            console.log("- Video display style:", videoElement ? window.getComputedStyle(videoElement).display : "not found");
+            console.log("- Download element:", downloadElement);
+            console.log("- Download display style:", downloadElement ? window.getComputedStyle(downloadElement).display : "not found");
+            console.log("- Download href:", downloadElement ? downloadElement.href : "not found");
+            console.log("- Video source:", videoElement ? videoElement.querySelector("source").src : "not found");
+          }, 100);
         } else if (result.status === "error") {
+          console.error("Video generation error:", result.error);
           error(result.error);
         } else {
           d3.select("#loading-message").text(statusMessage(result));
@@ -228,12 +267,16 @@ function initialize(err, themesWithImages) {
 
   // Button listeners
   d3.selectAll("#play, #pause").on("click", function(){
-    d3.event.preventDefault();
+    if (d3.event && d3.event.preventDefault) {
+      d3.event.preventDefault();
+    }
     audio.toggle();
   });
 
   d3.select("#restart").on("click", function(){
-    d3.event.preventDefault();
+    if (d3.event && d3.event.preventDefault) {
+      d3.event.preventDefault();
+    }
     audio.restart();
   });
 
@@ -241,14 +284,18 @@ function initialize(err, themesWithImages) {
   d3.select("#input-audio").on("change", updateAudioFile).each(updateAudioFile);
 
   d3.select("#return").on("click", function(){
-    d3.event.preventDefault();
+    if (d3.event && d3.event.preventDefault) {
+      d3.event.preventDefault();
+    }
     video.kill();
     setClass(null);
   });
 
   d3.select("#submit").on("click", submitted);
   d3.select("#regenerate").on("click", function() {
-    d3.event.preventDefault();
+    if (d3.event && d3.event.preventDefault) {
+      d3.event.preventDefault();
+    }
     regenerateVideo();
   });
 
@@ -269,7 +316,9 @@ function initialize(err, themesWithImages) {
 }
 
 function regenerateVideo() {
-  d3.event.preventDefault();
+  if (d3.event && d3.event.preventDefault) {
+    d3.event.preventDefault();
+  }
 
   var theme = preview.theme(),
       caption = preview.caption(),
@@ -437,7 +486,13 @@ function updateCaption() {
 }
 
 function updateTheme() {
-  preview.theme(d3.select(this.options[this.selectedIndex]).datum());
+  var selectedTheme = d3.select(this.options[this.selectedIndex]).datum();
+  preview.theme(selectedTheme);
+  
+  // Load speaker colors from theme if captions editor is available
+  if (window.captionsEditor && selectedTheme) {
+    window.captionsEditor.loadSpeakerColorsFromTheme(selectedTheme);
+  }
 }
 
 function preloadImages(themes) {
@@ -481,8 +536,10 @@ function preloadImages(themes) {
 }
 
 function setClass(cl, msg) {
+  console.log("setClass called with:", cl, msg);
   d3.select("body").attr("class", cl || null);
   d3.select("#error").text(msg || "");
+  console.log("Body class set to:", document.body.className);
 }
 
 function statusMessage(result) {

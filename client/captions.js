@@ -1,5 +1,183 @@
 var d3 = require("d3");
 
+// Caption Layout Manager Class
+function CaptionLayoutManager() {
+  this.layoutStrategy = "priority"; // "priority" | "speaker" | "time" | "manual"
+  this.autoFontSize = true;
+  this.autoPosition = true;
+  this.captionZones = {};
+  this.captionDefaults = {};
+  
+  this.calculateOptimalLayout = function(activeSegments, theme) {
+    if (!activeSegments || activeSegments.length === 0) {
+      return { zones: {}, overflow: [] };
+    }
+    
+    const captionZones = theme.captionZones || this.getDefaultZones();
+    const layout = {
+      zones: {},
+      overflow: []
+    };
+    
+    // Sort segments by strategy
+    const sortedSegments = this.sortSegmentsByStrategy(activeSegments);
+    
+    // Assign segments to zones
+    sortedSegments.forEach(segment => {
+      const assigned = this.assignSegmentToZone(segment, layout.zones, captionZones);
+      if (!assigned) {
+        layout.overflow.push(segment);
+      }
+    });
+    
+    return layout;
+  };
+  
+  this.sortSegmentsByStrategy = function(segments) {
+    switch (this.layoutStrategy) {
+      case "priority":
+        return segments.sort((a, b) => (b.end - b.start) - (a.end - a.start));
+      case "speaker":
+        return segments.sort((a, b) => (a.speaker || "").localeCompare(b.speaker || ""));
+      case "time":
+        return segments.sort((a, b) => a.start - b.start);
+      default:
+        return segments;
+    }
+  };
+  
+  this.assignSegmentToZone = function(segment, assignedZones, captionZones) {
+    const zoneKeys = Object.keys(captionZones).sort((a, b) => 
+      (captionZones[a].priority || 999) - (captionZones[b].priority || 999)
+    );
+    
+    for (const zoneKey of zoneKeys) {
+      const zone = captionZones[zoneKey];
+      if (!assignedZones[zoneKey]) {
+        assignedZones[zoneKey] = [];
+      }
+      
+      if (assignedZones[zoneKey].length < (zone.maxSpeakers || 1)) {
+        assignedZones[zoneKey].push(segment);
+        return true;
+      }
+    }
+    
+    return false;
+  };
+  
+  this.calculateOptimalFontSize = function(text, zone, maxWidth, maxHeight, context) {
+    const words = text.split(' ');
+    let fontSize = zone.maxFontSize || 48;
+    let fits = false;
+    
+    while (fontSize >= (zone.minFontSize || 16) && !fits) {
+      const lines = this.wrapTextIntelligently(text, maxWidth, fontSize, context);
+      const lineHeight = fontSize * 1.2; // line spacing
+      const totalHeight = lines.length * lineHeight;
+      
+      if (totalHeight <= maxHeight) {
+        fits = true;
+      } else {
+        fontSize -= 2;
+      }
+    }
+    
+    return Math.max(fontSize, zone.minFontSize || 16);
+  };
+  
+  this.wrapTextIntelligently = function(text, maxWidth, fontSize, context) {
+    const words = text.split(' ');
+    const lines = [];
+    let currentLine = [];
+    
+    words.forEach(word => {
+      const testLine = [...currentLine, word].join(' ');
+      context.font = fontSize + "px Arial"; // Use theme font when available
+      const metrics = context.measureText(testLine);
+      
+      if (metrics.width <= maxWidth) {
+        currentLine.push(word);
+      } else {
+        if (currentLine.length > 0) {
+          lines.push(currentLine.join(' '));
+          currentLine = [word];
+        } else {
+          // Word is too long, force break
+          lines.push(word);
+        }
+      }
+    });
+    
+    if (currentLine.length > 0) {
+      lines.push(currentLine.join(' '));
+    }
+    
+    return lines;
+  };
+  
+  this.detectCollisions = function(captionLayouts) {
+    const collisions = [];
+    
+    for (let i = 0; i < captionLayouts.length; i++) {
+      for (let j = i + 1; j < captionLayouts.length; j++) {
+        const layout1 = captionLayouts[i];
+        const layout2 = captionLayouts[j];
+        
+        if (this.rectanglesOverlap(layout1.bounds, layout2.bounds)) {
+          collisions.push({
+            caption1: layout1,
+            caption2: layout2,
+            overlap: this.calculateOverlap(layout1.bounds, layout2.bounds)
+          });
+        }
+      }
+    }
+    
+    return collisions;
+  };
+  
+  this.rectanglesOverlap = function(rect1, rect2) {
+    return !(rect1.x + rect1.width < rect2.x || 
+             rect2.x + rect2.width < rect1.x || 
+             rect1.y + rect1.height < rect2.y || 
+             rect2.y + rect2.height < rect1.y);
+  };
+  
+  this.calculateOverlap = function(rect1, rect2) {
+    const xOverlap = Math.max(0, Math.min(rect1.x + rect1.width, rect2.x + rect2.width) - Math.max(rect1.x, rect2.x));
+    const yOverlap = Math.max(0, Math.min(rect1.y + rect1.height, rect2.y + rect2.height) - Math.max(rect1.y, rect2.y));
+    return xOverlap * yOverlap;
+  };
+  
+  this.getDefaultZones = function() {
+    return {
+      "primary": {
+        "x": 10, "y": 70, "width": 80, "height": 25,
+        "maxSpeakers": 2, "stackDirection": "vertical", "spacing": 5, "priority": 1
+      },
+      "secondary": {
+        "x": 10, "y": 10, "width": 80, "height": 20,
+        "maxSpeakers": 1, "stackDirection": "vertical", "spacing": 5, "priority": 2
+      }
+    };
+  };
+  
+  this.getDefaultDefaults = function() {
+    return {
+      "backgroundColor": "transparent",
+      "backgroundOpacity": 0,
+      "fontSize": "auto",
+      "maxFontSize": 48,
+      "minFontSize": 16,
+      "lineSpacing": 1.2,
+      "padding": 8,
+      "strokeWidth": 2,
+      "strokeColor": "#000000"
+    };
+  };
+}
+
 // Timed captions editor module
 module.exports = function() {
 
@@ -45,7 +223,8 @@ module.exports = function() {
         lineWidth: 2,
         dotSize: 3,
         smoothing: 0
-      };
+      },
+      captionLayoutManager = new CaptionLayoutManager();
 
   // Define the speaker count change handler function
   function handleSpeakerCountChange() {
@@ -163,23 +342,35 @@ module.exports = function() {
 
     // Set up transcribe button
     d3.select("#transcribe-btn").on("click", function() {
-      d3.event.preventDefault();
+      if (d3.event && d3.event.preventDefault) {
+        d3.event.preventDefault();
+      }
       if (onUpdate) onUpdate("transcribe");
     });
 
     // Set up WebVTT export/import buttons
     d3.select("#export-webvtt-btn").on("click", function() {
-      d3.event.preventDefault();
+      if (d3.event && d3.event.preventDefault) {
+        d3.event.preventDefault();
+      }
       exportToWebVTT();
     });
 
     d3.select("#import-webvtt-btn").on("click", function() {
-      d3.event.preventDefault();
+      console.log("Import VTT button clicked");
+      // Use d3.event for this version of D3.js
+      if (d3.event && d3.event.preventDefault) {
+        d3.event.preventDefault();
+      }
+      console.log("About to trigger file input click");
       d3.select("#webvtt-file-input").node().click();
     });
 
     d3.select("#webvtt-file-input").on("change", function() {
-      handleWebVTTUpload(d3.event);
+      console.log("WebVTT file input changed");
+      // Use d3.event for this version of D3.js
+      var event = d3.event;
+      handleWebVTTUpload(event);
     });
 
     updateUI();
@@ -340,6 +531,14 @@ module.exports = function() {
         speakerNames[speaker] = speaker;
       }
     });
+    
+    // Load speaker colors from current theme if available
+    if (window.preview && typeof window.preview.theme === 'function') {
+      var currentTheme = window.preview.theme();
+      if (currentTheme) {
+        loadSpeakerColorsFromTheme(currentTheme);
+      }
+    }
     
     renderSegments();
     
@@ -566,7 +765,9 @@ module.exports = function() {
       .attr("class", "delete-segment")
       .html('<i class="fa fa-trash"></i>')
       .on("click", function(d, i) {
-        d3.event.preventDefault();
+        if (d3.event && d3.event.preventDefault) {
+          d3.event.preventDefault();
+        }
         deleteSegment(i);
       });
     
@@ -702,6 +903,208 @@ module.exports = function() {
       d3.select("#caption-stroke-width-value").text(this.value + "px");
       if (onUpdate) onUpdate();
     });
+    
+    // Zone controls
+    setupZoneControls();
+  }
+  
+  function setupZoneControls() {
+    // Layout strategy
+    d3.select("#layout-strategy").on("change", function() {
+      captionLayoutManager.layoutStrategy = this.value;
+      if (onUpdate) onUpdate();
+    });
+    
+    // Auto-sizing controls
+    d3.select("#auto-font-size").on("change", function() {
+      captionLayoutManager.autoFontSize = this.checked;
+      if (onUpdate) onUpdate();
+    });
+    
+    d3.select("#auto-position").on("change", function() {
+      captionLayoutManager.autoPosition = this.checked;
+      if (onUpdate) onUpdate();
+    });
+    
+    d3.select("#show-zone-boundaries").on("change", function() {
+      // This will be handled in the preview system
+      if (onUpdate) onUpdate();
+    });
+    
+    // Add zone button
+    d3.select("#add-zone-btn").on("click", function() {
+      addNewZone();
+    });
+    
+    // Render initial zones with a delay to ensure preview is initialized
+    setTimeout(function() {
+      renderZoneEditor();
+    }, 100);
+  }
+  
+  function renderZoneEditor() {
+    var container = d3.select("#zones-list");
+    container.html("");
+    
+    var zones = captionLayoutManager.captionZones;
+    if (Object.keys(zones).length === 0) {
+      // Load zones from current theme
+      if (window.preview && typeof window.preview.theme === 'function') {
+        var currentTheme = window.preview.theme();
+        if (currentTheme) {
+          zones = currentTheme.captionZones || {};
+        }
+      }
+      
+      // Fallback to default zones if no theme zones found
+      if (Object.keys(zones).length === 0) {
+        zones = captionLayoutManager.getDefaultZones();
+      }
+    }
+    
+    Object.keys(zones).forEach(function(zoneKey) {
+      var zone = zones[zoneKey];
+      var item = container.append("div")
+        .attr("class", "zone-item");
+      
+      item.append("h5").text(zoneKey);
+      
+      // Position controls
+      var positionGroup = item.append("div").attr("class", "formatting-group");
+      positionGroup.append("label").text("Position");
+      var positionControls = positionGroup.append("div").attr("class", "position-controls");
+      
+      var xRow = positionControls.append("div").attr("class", "control-row");
+      xRow.append("label").text("X:");
+      var xSlider = xRow.append("input")
+        .attr("type", "range")
+        .attr("min", 0)
+        .attr("max", 100)
+        .attr("value", zone.x)
+        .attr("step", 1);
+      var xValue = xRow.append("span").text(zone.x + "%");
+      
+      xSlider.on("input", function() {
+        zone.x = +this.value;
+        xValue.text(this.value + "%");
+        if (onUpdate) onUpdate();
+      });
+      
+      var yRow = positionControls.append("div").attr("class", "control-row");
+      yRow.append("label").text("Y:");
+      var ySlider = yRow.append("input")
+        .attr("type", "range")
+        .attr("min", 0)
+        .attr("max", 100)
+        .attr("value", zone.y)
+        .attr("step", 1);
+      var yValue = yRow.append("span").text(zone.y + "%");
+      
+      ySlider.on("input", function() {
+        zone.y = +this.value;
+        yValue.text(this.value + "%");
+        if (onUpdate) onUpdate();
+      });
+      
+      // Size controls
+      var sizeGroup = item.append("div").attr("class", "formatting-group");
+      sizeGroup.append("label").text("Size");
+      var sizeControls = sizeGroup.append("div").attr("class", "position-controls");
+      
+      var widthRow = sizeControls.append("div").attr("class", "control-row");
+      widthRow.append("label").text("Width:");
+      var widthSlider = widthRow.append("input")
+        .attr("type", "range")
+        .attr("min", 10)
+        .attr("max", 100)
+        .attr("value", zone.width)
+        .attr("step", 1);
+      var widthValue = widthRow.append("span").text(zone.width + "%");
+      
+      widthSlider.on("input", function() {
+        zone.width = +this.value;
+        widthValue.text(this.value + "%");
+        if (onUpdate) onUpdate();
+      });
+      
+      var heightRow = sizeControls.append("div").attr("class", "control-row");
+      heightRow.append("label").text("Height:");
+      var heightSlider = heightRow.append("input")
+        .attr("type", "range")
+        .attr("min", 5)
+        .attr("max", 50)
+        .attr("value", zone.height)
+        .attr("step", 1);
+      var heightValue = heightRow.append("span").text(zone.height + "%");
+      
+      heightSlider.on("input", function() {
+        zone.height = +this.value;
+        heightValue.text(this.value + "%");
+        if (onUpdate) onUpdate();
+      });
+      
+      // Max speakers
+      var speakersRow = sizeControls.append("div").attr("class", "control-row");
+      speakersRow.append("label").text("Max Speakers:");
+      var speakersSlider = speakersRow.append("input")
+        .attr("type", "range")
+        .attr("min", 1)
+        .attr("max", 5)
+        .attr("value", zone.maxSpeakers || 1)
+        .attr("step", 1);
+      var speakersValue = speakersRow.append("span").text((zone.maxSpeakers || 1) + "");
+      
+      speakersSlider.on("input", function() {
+        zone.maxSpeakers = +this.value;
+        speakersValue.text(this.value);
+        if (onUpdate) onUpdate();
+      });
+      
+      // Delete button
+      var deleteBtn = item.append("button")
+        .attr("class", "delete-zone-btn")
+        .text("Delete Zone")
+        .on("click", function() {
+          delete zones[zoneKey];
+          renderZoneEditor();
+          if (onUpdate) onUpdate();
+        });
+    });
+  }
+  
+  function addNewZone() {
+    var zoneName = prompt("Enter zone name:");
+    if (!zoneName) return;
+    
+    var zones = captionLayoutManager.captionZones;
+    if (Object.keys(zones).length === 0) {
+      // Load zones from current theme
+      if (window.preview && typeof window.preview.theme === 'function') {
+        var currentTheme = window.preview.theme();
+        if (currentTheme) {
+          zones = currentTheme.captionZones || {};
+        }
+      }
+      
+      // Fallback to default zones if no theme zones found
+      if (Object.keys(zones).length === 0) {
+        zones = captionLayoutManager.getDefaultZones();
+      }
+    }
+    
+    zones[zoneName] = {
+      x: 10,
+      y: 10,
+      width: 80,
+      height: 20,
+      maxSpeakers: 1,
+      stackDirection: "vertical",
+      spacing: 5,
+      priority: Object.keys(zones).length + 1
+    };
+    
+    renderZoneEditor();
+    if (onUpdate) onUpdate();
   }
 
   function setupWaveformPositioningControls() {
@@ -1032,6 +1435,58 @@ module.exports = function() {
     return waveformConfig;
   }
 
+  function getLayoutManager() {
+    return captionLayoutManager;
+  }
+
+  function loadSpeakerColorsFromTheme(theme) {
+    if (!theme || !theme.speakerColors) {
+      console.log("No speaker colors found in theme");
+      return;
+    }
+    
+    console.log("Loading speaker colors from theme:", theme.speakerColors);
+    
+    // Update speaker colors in caption formatting
+    Object.keys(theme.speakerColors).forEach(function(speakerKey) {
+      var color = theme.speakerColors[speakerKey];
+      
+      // Initialize speaker formatting if it doesn't exist
+      if (!captionFormatting.speakers[speakerKey]) {
+        captionFormatting.speakers[speakerKey] = {
+          x: captionFormatting.global.x,
+          y: captionFormatting.global.y,
+          fontSize: captionFormatting.global.fontSize,
+          color: color,
+          backgroundColor: captionFormatting.global.backgroundColor,
+          backgroundOpacity: captionFormatting.global.backgroundOpacity,
+          strokeColor: captionFormatting.global.strokeColor,
+          strokeWidth: captionFormatting.global.strokeWidth
+        };
+      } else {
+        // Update existing speaker color
+        captionFormatting.speakers[speakerKey].color = color;
+      }
+    });
+    
+    console.log("Updated caption formatting with speaker colors:", captionFormatting.speakers);
+    
+    // Re-render speaker formatting editor if it exists
+    if (segments.length > 0) {
+      renderSpeakerFormattingEditor();
+    }
+    
+    // Update preview if it's playing
+    if (previewPlaying) {
+      updatePreviewCaption();
+    }
+    
+    // Update main canvas preview
+    if (window.preview && window.preview.redraw) {
+      window.preview.redraw();
+    }
+  }
+
   function renderSpeakerNamesEditor() {
     var uniqueSpeakers = getUniqueSpeakers();
     var speakerEditor = d3.select("#speaker-names-editor");
@@ -1127,9 +1582,15 @@ module.exports = function() {
       updatePreviewCaption();
       updatePreviewTime();
       
-      // Stop at end of last segment
-      var lastSegment = segments[segments.length - 1];
-      if (previewTime > lastSegment.end) {
+      // Stop at end of last filtered segment (adjusted for audio selection)
+      var filteredSegments = filterSegmentsByAudioSelection(segments);
+      if (filteredSegments.length > 0) {
+        var lastSegment = filteredSegments[filteredSegments.length - 1];
+        if (previewTime > lastSegment.end) {
+          stopPreview();
+        }
+      } else {
+        // If no filtered segments, stop immediately
         stopPreview();
       }
     }, 100);
@@ -1382,12 +1843,22 @@ module.exports = function() {
 
   // Handle WebVTT file upload
   function handleWebVTTUpload(event) {
-    if (!event || !event.target || !event.target.files) {
-      console.error("Invalid event object in handleWebVTTUpload");
-      return;
+    console.log("handleWebVTTUpload called with event:", event);
+    
+    var file;
+    if (event && event.target && event.target.files) {
+      file = event.target.files[0];
+    } else {
+      // Fallback: get file directly from the input element
+      var fileInput = d3.select("#webvtt-file-input").node();
+      if (fileInput && fileInput.files && fileInput.files.length > 0) {
+        file = fileInput.files[0];
+        console.log("Using fallback file access, file:", file);
+      } else {
+        console.error("No file found in input element");
+        return;
+      }
     }
-
-    var file = event.target.files[0];
     if (!file) {
       console.log("No file selected");
       return;
@@ -1437,7 +1908,9 @@ module.exports = function() {
     handleWebVTTUpload: handleWebVTTUpload,
     getSelectedSegmentsCount: getSelectedSegmentsCount,
     filterSegmentsByAudioSelection: filterSegmentsByAudioSelection,
-    updateSegmentSelectionHighlighting: updateSegmentSelectionHighlighting
+    updateSegmentSelectionHighlighting: updateSegmentSelectionHighlighting,
+    loadSpeakerColorsFromTheme: loadSpeakerColorsFromTheme,
+    getLayoutManager: getLayoutManager
   };
 
 };

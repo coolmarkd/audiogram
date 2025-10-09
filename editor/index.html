@@ -125,6 +125,7 @@
             <div id="formatting-tabs">
               <button class="formatting-tab active" data-tab="global">Global</button>
               <button class="formatting-tab" data-tab="speakers">Per Speaker</button>
+              <button class="formatting-tab" data-tab="zones">Zones</button>
             </div>
             <div id="global-formatting" class="formatting-panel active">
               <div class="formatting-group">
@@ -157,8 +158,8 @@
                   <div class="control-row">
                     <label>Background:</label>
                     <input type="color" id="caption-bg-color" value="#000000">
-                    <input type="range" id="caption-bg-opacity" min="0" max="100" value="70" step="5">
-                    <span id="caption-bg-opacity-value">70%</span>
+                    <input type="range" id="caption-bg-opacity" min="0" max="100" value="0" step="5">
+                    <span id="caption-bg-opacity-value">0%</span>
                   </div>
                   <div class="control-row">
                     <label>Text Stroke Color:</label>
@@ -174,6 +175,39 @@
             </div>
             <div id="speakers-formatting" class="formatting-panel">
               <div id="speaker-formatting-list"></div>
+            </div>
+            <div id="zones-formatting" class="formatting-panel">
+              <div class="formatting-group">
+                <label>Layout Strategy</label>
+                <select id="layout-strategy">
+                  <option value="priority">Priority-based (longer captions get better positions)</option>
+                  <option value="speaker">Speaker-based (consistent speaker positions)</option>
+                  <option value="time">Time-based (first speaker gets top position)</option>
+                  <option value="manual">Manual assignment</option>
+                </select>
+              </div>
+              
+              <div class="formatting-group">
+                <label>Auto-sizing</label>
+                <div class="control-row">
+                  <input type="checkbox" id="auto-font-size" checked>
+                  <label for="auto-font-size">Automatically adjust font size</label>
+                </div>
+                <div class="control-row">
+                  <input type="checkbox" id="auto-position" checked>
+                  <label for="auto-position">Automatically position captions</label>
+                </div>
+                <div class="control-row">
+                  <input type="checkbox" id="show-zone-boundaries" checked>
+                  <label for="show-zone-boundaries">Show zone boundaries in preview</label>
+                </div>
+              </div>
+              
+              <div class="formatting-group">
+                <label>Caption Zones</label>
+                <div id="zones-list"></div>
+                <button id="add-zone-btn" class="button">Add Zone</button>
+              </div>
             </div>
           </div>
           <div id="waveform-positioning-editor" class="hidden">
