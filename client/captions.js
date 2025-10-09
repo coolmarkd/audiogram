@@ -40,7 +40,7 @@ module.exports = function() {
         color: "#ffffff",
         colorSecondary: "#cccccc",
         backgroundColor: "#000000",
-        backgroundOpacity: 0,
+        backgroundOpacity: 20, // Make background slightly visible
         spacing: 1,
         lineWidth: 2,
         dotSize: 3,

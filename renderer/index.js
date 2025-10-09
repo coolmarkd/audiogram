@@ -68,7 +68,19 @@ module.exports = function(t) {
 
     // Draw waveform with custom positioning and configuration
     if (options.waveform) {
+      // Debug: Log waveform data structure
+      if (options.frame === 0) { // Only log for first frame to avoid spam
+        console.log("Waveform data for frame 0:", {
+          hasWaveform: !!options.waveform,
+          waveformLength: options.waveform ? options.waveform.length : 0,
+          firstPoint: options.waveform && options.waveform[0] ? options.waveform[0] : null,
+          positioning: options.waveformPositioning,
+          config: options.waveformConfig
+        });
+      }
       drawWaveformWithConfig(context, options.waveform, theme, options.waveformPositioning, options.waveformConfig);
+    } else {
+      console.warn("No waveform data provided for frame", options.frame);
     }
 
     // Write the caption (static or timed)
@@ -193,10 +205,23 @@ module.exports = function(t) {
     
     context.fillStyle = color;
     
+    if (!waveform || !Array.isArray(waveform) || waveform.length === 0) {
+      console.warn("Invalid waveform data for bars rendering");
+      return;
+    }
+    
     var barWidth = (width - (waveform.length - 1) * spacing) / waveform.length;
     
-    waveform.forEach(function(bar, i) {
-      var barHeight = (bar / 255) * height;
+    waveform.forEach(function(point, i) {
+      // Handle both old format (single number) and new format ([rms, midpoint])
+      var barValue;
+      if (Array.isArray(point)) {
+        barValue = point[0]; // Use RMS value for bar height
+      } else {
+        barValue = point; // Fallback for old format
+      }
+      
+      var barHeight = Math.max(1, barValue * height); // Ensure minimum height of 1px
       var barX = x + (i * (barWidth + spacing));
       var barY = y + (height - barHeight);
       
@@ -213,11 +238,24 @@ module.exports = function(t) {
     context.lineCap = "round";
     context.lineJoin = "round";
     
+    if (!waveform || !Array.isArray(waveform) || waveform.length === 0) {
+      console.warn("Invalid waveform data for line rendering");
+      return;
+    }
+    
     context.beginPath();
     
-    waveform.forEach(function(bar, i) {
+    waveform.forEach(function(point, i) {
+      // Handle both old format (single number) and new format ([rms, midpoint])
+      var pointValue;
+      if (Array.isArray(point)) {
+        pointValue = point[0]; // Use RMS value for line height
+      } else {
+        pointValue = point; // Fallback for old format
+      }
+      
       var pointX = x + (i / (waveform.length - 1)) * width;
-      var pointY = y + height - ((bar / 255) * height);
+      var pointY = y + height - (pointValue * height);
       
       if (i === 0) {
         context.moveTo(pointX, pointY);
@@ -233,14 +271,27 @@ module.exports = function(t) {
     var color = (config && config.color) || theme.waveformColor || theme.waveColor || "#ffffff";
     var secondaryColor = (config && config.colorSecondary) || "#cccccc";
     
+    if (!waveform || !Array.isArray(waveform) || waveform.length === 0) {
+      console.warn("Invalid waveform data for area rendering");
+      return;
+    }
+    
     // Draw area fill
     context.fillStyle = color;
     context.beginPath();
     context.moveTo(x, y + height);
     
-    waveform.forEach(function(bar, i) {
+    waveform.forEach(function(point, i) {
+      // Handle both old format (single number) and new format ([rms, midpoint])
+      var pointValue;
+      if (Array.isArray(point)) {
+        pointValue = point[0]; // Use RMS value for area height
+      } else {
+        pointValue = point; // Fallback for old format
+      }
+      
       var pointX = x + (i / (waveform.length - 1)) * width;
-      var pointY = y + height - ((bar / 255) * height);
+      var pointY = y + height - (pointValue * height);
       context.lineTo(pointX, pointY);
     });
     
@@ -253,9 +304,17 @@ module.exports = function(t) {
     context.lineWidth = 2;
     context.beginPath();
     
-    waveform.forEach(function(bar, i) {
+    waveform.forEach(function(point, i) {
+      // Handle both old format (single number) and new format ([rms, midpoint])
+      var pointValue;
+      if (Array.isArray(point)) {
+        pointValue = point[0]; // Use RMS value for line height
+      } else {
+        pointValue = point; // Fallback for old format
+      }
+      
       var pointX = x + (i / (waveform.length - 1)) * width;
-      var pointY = y + height - ((bar / 255) * height);
+      var pointY = y + height - (pointValue * height);
       
       if (i === 0) {
         context.moveTo(pointX, pointY);
